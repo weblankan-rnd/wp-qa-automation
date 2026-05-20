@@ -130,10 +130,16 @@ test.describe('Buttons', () => {
     const count = await allButtons.count();
 
     for (let i = 0; i < count; i++) {
-      const visible = await allButtons.nth(i).isVisible().catch(() => false);
+      const btn = allButtons.nth(i);
+      const visible = await btn.isVisible().catch(() => false);
       if (!visible) continue;
 
-      const text = (await allButtons.nth(i).textContent()) || '';
+      // Skip icon-only buttons that use aria-label instead of visible text
+      const ariaLabel = await btn.getAttribute('aria-label');
+      const title = await btn.getAttribute('title');
+      if (ariaLabel || title) continue;
+
+      const text = await btn.evaluate(el => (el as HTMLElement).innerText ?? '');
       const trimmed = text.replace(/\s+/g, ' ').trim();
       expect(
         trimmed.length,
