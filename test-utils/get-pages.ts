@@ -20,7 +20,7 @@ export async function getPages(): Promise<string[]> {
   }
 
   try {
-    const response = await fetch(`${baseUrl}/sitemap.xml`, { signal: AbortSignal.timeout(10000) });
+    const response = await fetch(`${baseUrl}/sitemap.xml`, { signal: AbortSignal.timeout(5000) });
     if (!response.ok) throw new Error(`Sitemap returned ${response.status}`);
 
     const xml = await response.text();
