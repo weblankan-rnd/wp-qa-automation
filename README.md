@@ -1,6 +1,6 @@
 # WordPress QA Agent — Playwright Test Suite
 
-Automated frontend QA suite for WordPress sites. Discovers pages automatically from the sitemap and runs tests across 5 browser projects (Chrome, Firefox, Safari, Mobile Chrome, Mobile Safari).
+Automated frontend QA suite for WordPress sites. Discovers pages automatically from the sitemap and runs tests on Chrome by default. Set `FULL_MATRIX=true` to run across all 5 browsers (Chrome, Firefox, Safari, Mobile Chrome, Mobile Safari).
 
 ---
 
@@ -84,13 +84,6 @@ npm run test:report
 - [x] All images have alt attributes
 - [x] Robots meta does not contain `noindex` on homepage
 
-### `broken-links`
-
-- [x] All `<a href>` URLs return < 400 status
-- [x] HEAD request with GET fallback
-- [x] Batched with 8s timeout per link
-- [x] Checks all pages discovered from sitemap
-
 ### `performance`
 
 - [x] Page load time within threshold
@@ -118,6 +111,7 @@ cp .env.example .env
 |---|---|---|
 | `BASE_URL` | `https://www.weblankan.lk` | Target site (no trailing slash) |
 | `ENVIRONMENT` | `live` | `live` = safe mode, excludes destructive tests |
+| `FULL_MATRIX` | `false` | Set `true` to run all 5 browsers instead of Chrome only |
 | `WP_LOGIN_URL` | `/wp-login.php` | Login page path |
 | `CHECK_LOAD_TIME` | `false` | Fail tests on slow page loads |
 | `LOAD_TIME_THRESHOLD_MS` | `3000` | Max load time in ms |
@@ -131,27 +125,27 @@ cp .env.example .env
 
 ### General
 
-| Command | Runs |
+| Command | Description |
 |---|---|
+| `npx playwright test` | All tests, Chrome only (default) |
+| `FULL_MATRIX=true npx playwright test` | All tests, all 5 browsers |
+| `ENVIRONMENT=live BASE_URL=https://yoursite.com npx playwright test` | Against live site |
+| `npx playwright test --grep @smoke` | Smoke tests only |
 | `npm run test:live` | All tests (safe), live env |
-| `npm test` | All tests, all browsers |
 | `npm run test:headed` | Visible browser |
 | `npm run test:ui` | Playwright UI mode |
 | `npm run test:report` | Open HTML report |
-| `npm run test:smoke` | Only `@smoke` tagged |
 
-### By category
+### By spec
 
 | Command | Spec file |
 |---------|-----------|
-| `npm run test:images` | `tests/images.spec.ts` |
-| `npm run test:links` | `tests/broken-links.spec.ts` |
-| `npm run test:seo` | `tests/seo.spec.ts` |
-| `npm run test:responsive` | `tests/responsive.spec.ts` |
+| `npx playwright test tests/images.spec.ts` | Image format & size |
+| `npx playwright test tests/seo.spec.ts` | SEO tags |
+| `npx playwright test tests/responsive.spec.ts` | Responsive design |
+| `npx playwright test tests/performance.spec.ts` | Performance |
 
-Run any other spec directly: `npx playwright test tests/<name>.spec.ts`
-
-### By browser
+### By browser (full matrix)
 
 | Command | Runs on |
 |---|---|
@@ -160,10 +154,6 @@ Run any other spec directly: `npx playwright test tests/<name>.spec.ts`
 | `npm run test:safari` | Desktop + Mobile Safari |
 | `npm run test:desktop` | All 3 desktop browsers |
 | `npm run test:mobile` | Both mobile |
-| `npm run test:browser <name>` | Single project by name |
-
-Prefix with `live:` to also set `ENVIRONMENT=live`:
-`npm run live:chrome`, `live:firefox`, `live:safari`, `live:desktop`, `live:mobile`, `live:browser <name>`
 
 ---
 
@@ -186,14 +176,13 @@ Pages are not hardcoded. On every run, `global-setup.ts` fetches `BASE_URL/sitem
 ## Project Structure
 
 ```
-tests/                    # Playwright spec files (9 total)
+tests/                    # Playwright spec files (8 total)
   header.spec.ts          # Logo, hamburger, active state
   footer.spec.ts          # Logo, links, copyright, social media, spelling
   navigation.spec.ts      # Link navigation, external link targets
   buttons.spec.ts         # CTA visibility, clickability, spelling
   responsive.spec.ts      # Viewport overflow, mobile nav, text readability
   seo.spec.ts             # Title, meta, OG tags, H1, alt, robots
-  broken-links.spec.ts    # All hrefs return < 400
   performance.spec.ts     # Load time, LCP, render-blocking
   images.spec.ts          # Format and size checks
 test-utils/
@@ -205,7 +194,7 @@ reports/                  # Auto-generated test reports
 .github/workflows/
   qa.yml                  # Manual-trigger GitHub Actions
 global-setup.ts           # Env validation + sitemap cache
-playwright.config.ts      # 5 browser projects (Chrome, Firefox, Safari x2)
+playwright.config.ts      # Chrome by default; FULL_MATRIX=true for all 5 browsers
 AGENTS.md                 # QA agent instructions
 .env.example              # Environment template
 ```
