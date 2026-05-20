@@ -84,11 +84,11 @@ test.describe('Buttons', () => {
       if (!cleanText) continue;
 
       const commonErrors: { wrong: RegExp; fix: string }[] = [
-        { wrong: /\b(investor|invester|investar)\b/i, fix: 'Investor (not invester/investar)' },
-        { wrong: /\b(cannabies|cannabies)\b/i, fix: 'Cannabis (not cannabies)' },
-        { wrong: /\b(ceylon|celon|selon)\b/i, fix: 'Ceylon (not celon/selon)' },
-        { wrong: /\b(explore|explorr|explor)\b/i, fix: 'Explore (not explorr/explor)' },
-        { wrong: /\b(contact|contcat|contct)\b/i, fix: 'Contact (not contcat)' },
+        { wrong: /\b(invester|investar)\b/i, fix: 'Investor (not invester/investar)' },
+        { wrong: /\b(cannabies)\b/i, fix: 'Cannabis (not cannabies)' },
+        { wrong: /\b(celon|selon)\b/i, fix: 'Ceylon (not celon/selon)' },
+        { wrong: /\b(explorr|explor)\b/i, fix: 'Explore (not explorr/explor)' },
+        { wrong: /\b(contcat|contct)\b/i, fix: 'Contact (not contcat)' },
       ];
 
       for (const { wrong, fix } of commonErrors) {
