@@ -7,6 +7,7 @@ on:
 
 jobs:
   smoke-test:
+    if: secrets.LIVE_URL != ''
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4

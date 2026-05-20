@@ -1,10 +1,7 @@
-name: QA
+name: Staging QA
 
 on:
-  push:
-    branches: [main]
-  schedule:
-    - cron: '0 6 * * *'
+  workflow_dispatch:
 
 jobs:
   test:
