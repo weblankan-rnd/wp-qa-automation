@@ -23,7 +23,7 @@
     "test:broken-links": "playwright test tests/broken-links.spec.ts",
     "test:smoke": "playwright test --grep @smoke",
     "test:staging": "ENVIRONMENT=staging playwright test",
-    "test:live": "ENVIRONMENT=live playwright test --grep @smoke"
+    "test:live": "ENVIRONMENT=live playwright test"
   },
   "devDependencies": {
     "@axe-core/playwright": "^4.9.1",
