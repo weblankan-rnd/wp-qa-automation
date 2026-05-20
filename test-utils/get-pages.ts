@@ -51,18 +51,33 @@ export async function getPages(): Promise<string[]> {
     const sitemapUrl = `${baseUrl}/sitemap.xml`;
     const urls = await fetchSitemapUrls(sitemapUrl);
 
-    const paths = urls
+    const candidates = urls
       .map(url => {
-        try { return new URL(url).pathname; } catch { return null; }
+        try { return { path: new URL(url).pathname, full: url }; } catch { return null; }
       })
-      .filter((p): p is string =>
-        p !== null &&
-        p !== '/' &&
-        !EXCLUDED_PATTERNS.some(r => r.test(p)) &&
-        !IGNORED_PATHS.includes(p)
+      .filter((e): e is { path: string; full: string } =>
+        e !== null &&
+        e.path !== '/' &&
+        !EXCLUDED_PATTERNS.some(r => r.test(e.path)) &&
+        !IGNORED_PATHS.includes(e.path)
       )
-      .filter((p, i, arr) => arr.indexOf(p) === i)
-      .slice(0, 20); // cap to avoid timeouts
+      .filter((e, i, arr) => arr.findIndex(x => x.path === e.path) === i)
+      .slice(0, 30);
+
+    // Verify each page actually returns 200 before including it
+    const verified = await Promise.all(
+      candidates.map(async ({ path, full }) => {
+        try {
+          const res = await fetch(full, { method: 'HEAD', signal: AbortSignal.timeout(8000), redirect: 'follow' });
+          return res.ok ? path : null;
+        } catch {
+          return null;
+        }
+      })
+    );
+
+    const paths = verified.filter((p): p is string => p !== null).slice(0, 20);
+    console.log(`[get-pages] Verified ${paths.length}/${candidates.length} pages as reachable`);
 
     cachedPages = ['/', ...paths];
     return cachedPages;
