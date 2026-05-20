@@ -22,7 +22,6 @@ test.describe('Responsive Design', () => {
     const isArchive = isArchivePage(pagePath);
 
     test(`has viewport meta tag on ${label} @smoke`, async ({ page }) => {
-      test.setTimeout(60000);
       await page.goto(pagePath, { waitUntil: 'domcontentloaded' });
       const viewport = await page.getAttribute('meta[name="viewport"]', 'content');
       expect(viewport, `Missing viewport meta tag on ${pagePath}`).toBeTruthy();
