@@ -6,6 +6,8 @@ const pagesToCheck: string[] = existsSync(cachePath)
   ? JSON.parse(readFileSync(cachePath, 'utf-8'))
   : ['/'];
 
+const IMAGE_SIZE_LIMIT_KB = Number(process.env.IMAGE_SIZE_LIMIT_KB) || 600;
+
 test.describe('Images', () => {
   for (const pagePath of pagesToCheck) {
     test(`all images are .webp format on ${pagePath === '/' ? 'homepage' : pagePath} @smoke`, async ({ page }) => {
@@ -55,5 +57,38 @@ test.describe('Images', () => {
     if (bgImages.length > 0) {
       console.warn(`Non-WebP background images:\n${bgImages.join('\n')}`);
     }
+  });
+
+  test('no image exceeds size limit on homepage @smoke', async ({ page, request }) => {
+    await page.goto('/');
+    await page.waitForLoadState('networkidle');
+
+    const images = page.locator('img[src]');
+    const count = await images.count();
+
+    const oversized: string[] = [];
+    for (let i = 0; i < count; i++) {
+      const src = await images.nth(i).getAttribute('src');
+      if (!src || src.startsWith('data:')) continue;
+
+      const url = src.startsWith('http') ? src : `${process.env.BASE_URL || ''}${src}`;
+      try {
+        const resp = await request.get(url, { timeout: 10000 });
+        const cl = resp.headers()['content-length'];
+        if (cl) {
+          const sizeKB = parseInt(cl, 10) / 1024;
+          if (sizeKB > IMAGE_SIZE_LIMIT_KB) {
+            oversized.push(`${url} — ${sizeKB.toFixed(0)}KB`);
+          }
+        }
+      } catch {
+        oversized.push(`${url} — could not fetch`);
+      }
+    }
+
+    expect(
+      oversized,
+      `Images exceeding ${IMAGE_SIZE_LIMIT_KB}KB:\n${oversized.join('\n')}`
+    ).toHaveLength(0);
   });
 });
