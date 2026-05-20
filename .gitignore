@@ -32,3 +32,4 @@ dist/
 # ─── Misc ──────────────────────────────────────────────────────────────────────
 *.log
 npm-debug.log*
+.claude/settings.local.json
