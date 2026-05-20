@@ -1,0 +1,25 @@
+{
+  "contact": {
+    "fields": {
+      "name": { "selector": "input[name='your-name'], input[name='name'], input[data-testid='field-name']", "value": "QA Test User" },
+      "email": { "selector": "input[name='your-email'], input[name='email'], input[type='email']", "value": "qa-test@example.com" },
+      "subject": { "selector": "input[name='your-subject'], input[name='subject']", "value": "QA Automated Test" },
+      "message": { "selector": "textarea[name='your-message'], textarea[name='message']", "value": "This is an automated QA test message. Please ignore." }
+    },
+    "submitSelector": "input[type='submit'], button[type='submit']",
+    "successIndicator": ".wpcf7-mail-sent-ok, [data-testid='form-success'], .alert-success"
+  },
+  "upload": {
+    "allowedTypes": ["image/jpeg", "image/png", "image/webp", "application/pdf"],
+    "maxSizeMB": 5,
+    "testFile": "test-data/sample-upload.jpg"
+  },
+  "registration": {
+    "fields": {
+      "username": { "selector": "#user_login, input[name='user_login']" },
+      "email": { "selector": "#user_email, input[name='user_email']" },
+      "password": { "selector": "#user_pass, input[name='user_pass'], input[type='password']" }
+    },
+    "submitSelector": "#wp-submit, input[type='submit']"
+  }
+}

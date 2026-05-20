@@ -1,0 +1,34 @@
+{
+  "name": "wordpress-qa-agent",
+  "version": "1.0.0",
+  "description": "Playwright-based QA automation suite for WordPress sites",
+  "scripts": {
+    "test": "playwright test",
+    "test:headed": "playwright test --headed",
+    "test:ui": "playwright test --ui",
+    "test:report": "playwright show-report",
+    "test:header": "playwright test tests/header.spec.ts",
+    "test:footer": "playwright test tests/footer.spec.ts",
+    "test:forms": "playwright test tests/forms.spec.ts",
+    "test:login": "playwright test tests/login.spec.ts",
+    "test:registration": "playwright test tests/registration.spec.ts",
+    "test:responsive": "playwright test tests/responsive.spec.ts",
+    "test:seo": "playwright test tests/seo.spec.ts",
+    "test:links": "playwright test tests/broken-links.spec.ts",
+    "test:nav": "playwright test tests/navigation.spec.ts",
+    "test:a11y": "playwright test tests/accessibility.spec.ts",
+    "test:perf": "playwright test tests/performance.spec.ts",
+    "test:console": "playwright test tests/console-errors.spec.ts",
+    "test:smoke": "playwright test --grep @smoke",
+    "test:staging": "ENVIRONMENT=staging playwright test",
+    "test:live": "ENVIRONMENT=live playwright test --grep @smoke"
+  },
+  "dependencies": {
+    "dotenv": "^16.4.5"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.45.0",
+    "@axe-core/playwright": "^4.9.1",
+    "typescript": "^5.5.3"
+  }
+}
