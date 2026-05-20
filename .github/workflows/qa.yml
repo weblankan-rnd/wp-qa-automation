@@ -20,7 +20,7 @@ jobs:
       - run: npx playwright install --with-deps
       - run: npm run test:live
         env:
-          BASE_URL: ${{ secrets.LIVE_URL }}
+          BASE_URL: https://www.weblankan.lk
           ENVIRONMENT: live
       - uses: actions/upload-artifact@v4
         if: always()
