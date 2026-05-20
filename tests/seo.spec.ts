@@ -1,6 +1,7 @@
 import { test, expect } from '@playwright/test';
+import pages from '../test-data/pages.json';
 
-const criticalPages = ['/', '/about-us/', '/contact-us/', '/accommodation/'];
+const criticalPages = pages.seo_critical.map(p => p.path);
 
 test.describe('SEO basics', () => {
   for (const pagePath of criticalPages) {
@@ -74,7 +75,7 @@ test.describe('SEO basics', () => {
     const response = await request.get(`${process.env.BASE_URL}/sitemap.xml`);
     const status = response.status();
     // 200 = sitemap exists, 404 = acceptable if not generated yet
-    expect([200, 301, 302], `Sitemap returned unexpected status ${status}`).toContain(status === 404 ? 404 : 200);
+    expect([200, 301, 302, 404], `Sitemap returned unexpected status ${status}`).toContain(status);
     if (status === 200) {
       const body = await response.text();
       expect(body).toContain('<?xml');

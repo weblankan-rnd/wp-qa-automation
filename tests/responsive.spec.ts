@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test';
+import pages from '../test-data/pages.json';
 
 const viewports = [
   { name: 'mobile-sm', width: 390, height: 844, label: 'Mobile small (390px)' },
@@ -8,9 +9,9 @@ const viewports = [
   { name: 'desktop', width: 1280, height: 800, label: 'Desktop (1280px)' },
 ];
 
-const pagesToTest = ['/', '/about', '/contact', '/blog'].map(path => ({
-  path,
-  name: path === '/' ? 'Homepage' : path.replace('/', '').replace(/-/g, ' '),
+const pagesToTest = pages.smoke.slice(0, 4).map(p => ({
+  path: p.path,
+  name: p.name,
 }));
 
 test.describe('Responsive layout', () => {

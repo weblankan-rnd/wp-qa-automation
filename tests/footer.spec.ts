@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test';
+import { checkLinks } from '../test-utils/check-links';
 
 test.describe('Footer', () => {
   test.beforeEach(async ({ page }) => {
@@ -25,22 +26,15 @@ test.describe('Footer', () => {
   test('footer contains copyright text', async ({ page }) => {
     const footer = page.locator('footer');
     const text = await footer.textContent();
-    expect(text).toMatch(/©|copyright|\d{4}/i);
+    expect(text, 'Footer text content is empty').toBeTruthy();
+    expect(text!).toMatch(/©|copyright|\d{4}/i);
   });
 
   test('all footer links return non-error HTTP status', async ({ page, request }) => {
     const links = page.locator('footer a');
-    const count = await links.count();
-
-    for (let i = 0; i < count; i++) {
-      const href = await links.nth(i).getAttribute('href');
-      if (!href || href.startsWith('#') || href.startsWith('tel:') || href.startsWith('mailto:') || href.startsWith('javascript:')) {
-        continue;
-      }
-      const url = href.startsWith('http') ? href : `${process.env.BASE_URL}${href}`;
-      const response = await request.get(url);
-      expect(response.status(), `Broken footer link: ${url}`).toBeLessThan(400);
-    }
+    const baseURL = process.env.BASE_URL || '';
+    const broken = await checkLinks(request, links, baseURL);
+    expect(broken, `Broken footer links:\n${broken.join('\n')}`).toHaveLength(0);
   });
 
   test('footer social media links are present and visible', async ({ page }) => {

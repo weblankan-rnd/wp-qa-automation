@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test';
+import { checkLinks } from '../test-utils/check-links';
 
 test.describe('Header', () => {
   test.beforeEach(async ({ page }) => {
@@ -10,7 +11,6 @@ test.describe('Header', () => {
   });
 
   test('site logo is visible and links to homepage @smoke', async ({ page }) => {
-    // supercorals.hostweblankan.in: logo is <a class="logo"> inside <div class="logo-sec">
     const logo = page.locator('.logo-sec a.logo, header a.logo, header .custom-logo-link, header a img').first();
     await expect(logo).toBeVisible();
 
@@ -19,13 +19,11 @@ test.describe('Header', () => {
   });
 
   test('primary navigation menu is visible @smoke', async ({ page }) => {
-    // supercorals.hostweblankan.in: nav id is navbar_main_mobile
     const nav = page.locator('#navbar_main_mobile, header nav, header .nav, header #site-navigation, header [class*="menu"]').first();
     await expect(nav).toBeVisible();
   });
 
   test('navigation menu has at least one link', async ({ page }) => {
-    // supercorals.hostweblankan.in: nav links are inside ul#primary
     const navLinks = page.locator('#primary a, #navbar_main_mobile a, header nav a, header .nav a');
     await expect(navLinks.first()).toBeVisible();
     const count = await navLinks.count();
@@ -34,17 +32,9 @@ test.describe('Header', () => {
 
   test('all header links return non-error HTTP status', async ({ page, request }) => {
     const links = page.locator('header a');
-    const count = await links.count();
-
-    for (let i = 0; i < count; i++) {
-      const href = await links.nth(i).getAttribute('href');
-      if (!href || href.startsWith('#') || href.startsWith('tel:') || href.startsWith('mailto:') || href.startsWith('javascript:')) {
-        continue;
-      }
-      const url = href.startsWith('http') ? href : `${process.env.BASE_URL}${href}`;
-      const response = await request.get(url);
-      expect(response.status(), `Broken header link: ${url}`).toBeLessThan(400);
-    }
+    const baseURL = process.env.BASE_URL || '';
+    const broken = await checkLinks(request, links, baseURL);
+    expect(broken, `Broken header links:\n${broken.join('\n')}`).toHaveLength(0);
   });
 
   test('mobile hamburger menu opens on small viewport', async ({ page }) => {
@@ -70,8 +60,6 @@ test.describe('Header', () => {
 
   test('header remains visible after scrolling', async ({ page }) => {
     await page.evaluate(() => window.scrollTo(0, 500));
-    await page.waitForTimeout(300);
-
     const header = page.locator('header');
     await expect(header).toBeVisible();
   });

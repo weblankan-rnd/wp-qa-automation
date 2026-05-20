@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test';
+import { checkLinks } from '../test-utils/check-links';
 
 test.describe('Buttons', () => {
   test.beforeEach(async ({ page }) => {
@@ -35,17 +36,9 @@ test.describe('Buttons', () => {
 
   test('CTA button links resolve without errors', async ({ page, request }) => {
     const buttons = page.locator('a.button, a.btn, .wp-block-button__link');
-    const count = await buttons.count();
-
-    for (let i = 0; i < count; i++) {
-      const href = await buttons.nth(i).getAttribute('href');
-      if (!href || href.startsWith('#') || href.startsWith('tel:') || href.startsWith('mailto:') || href.startsWith('javascript:')) {
-        continue;
-      }
-      const url = href.startsWith('http') ? href : `${process.env.BASE_URL}${href}`;
-      const response = await request.get(url);
-      expect(response.status(), `Button link broken: ${url}`).toBeLessThan(400);
-    }
+    const baseURL = process.env.BASE_URL || '';
+    const broken = await checkLinks(request, buttons, baseURL);
+    expect(broken, `Broken button links:\n${broken.join('\n')}`).toHaveLength(0);
   });
 
   test('submit buttons inside forms have type="submit"', async ({ page }) => {
@@ -54,8 +47,7 @@ test.describe('Buttons', () => {
 
     for (let i = 0; i < count; i++) {
       const type = await submitButtons.nth(i).getAttribute('type');
-      // type="submit" is default for buttons in forms, but explicit is better
-      expect(['submit', null], `Submit button missing type attribute`).toContain(type);
+      expect(type, `Submit button at index ${i} has type "${type}" — expected "submit"`).toMatch(/^(submit)?$/);
     }
   });
 
@@ -70,7 +62,6 @@ test.describe('Buttons', () => {
 
   test('back-to-top button works if present', async ({ page }) => {
     await page.evaluate(() => window.scrollTo(0, 1000));
-    await page.waitForTimeout(300);
 
     const backToTop = page.locator(
       '[class*="back-to-top"], [class*="scroll-top"], a[href="#top"], #back-to-top, [data-testid="back-to-top"]'
@@ -79,7 +70,6 @@ test.describe('Buttons', () => {
     if (await backToTop.count() > 0) {
       await expect(backToTop).toBeVisible();
       await backToTop.click();
-      await page.waitForTimeout(500);
       const scrollY = await page.evaluate(() => window.scrollY);
       expect(scrollY).toBeLessThan(100);
     }

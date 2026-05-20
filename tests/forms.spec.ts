@@ -52,16 +52,16 @@ test.describe('Forms — inputs, upload, radio, checkbox, URL fields', () => {
         await page.goto(path_);
         const fileInput = page.locator('input[type="file"]').first();
         if (await fileInput.count() > 0) {
-          // Create a tiny in-memory PNG (1x1 pixel)
           const testFilePath = path.join(process.cwd(), 'test-data', 'sample-upload.jpg');
-          await fileInput.setInputFiles(testFilePath).catch(async () => {
-            // File doesn't exist yet — use a buffer
+          try {
+            await fileInput.setInputFiles(testFilePath);
+          } catch {
             await fileInput.setInputFiles({
               name: 'test-image.jpg',
               mimeType: 'image/jpeg',
               buffer: Buffer.from('/9j/4AAQSkZJRgABAQEASABIAAD/2wBDAAgGBgcGBQgHBwcJCQgKDBQNDAsLDBkSEw8UHRofHh0aHBwgJC4nICIsIxwcKDcpLDAxNDQ0Hyc5PTgyPC4zNDL/wAALCAABAAEBAREA/8QAFAABAAAAAAAAAAAAAAAAAAAACf/EABQQAQAAAAAAAAAAAAAAAAAAAAD/2gAIAQEAAD8AKwAB/9k=', 'base64'),
             });
-          });
+          }
           const value = await fileInput.inputValue();
           expect(value).toBeTruthy();
           return;

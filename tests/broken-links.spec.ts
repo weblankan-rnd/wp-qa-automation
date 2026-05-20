@@ -1,6 +1,7 @@
 import { test, expect } from '@playwright/test';
+import pages from '../test-data/pages.json';
 
-const pagesToScan = ['/', '/about-us/', '/contact-us/', '/accommodation/'];
+const pagesToScan = pages.smoke.map(p => p.path);
 
 // External domains that block automated requests (rate-limit, 400 bots, or require login).
 // Links to these are visually verified — not checked by automation.
@@ -22,7 +23,10 @@ const ignoredDomains = [
 ];
 
 function isIgnored(url: string): boolean {
-  return ignoredDomains.some(domain => url.includes(domain));
+  return ignoredDomains.some(domain => {
+    const escaped = domain.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    return new RegExp(`(^https?:\\/\\/)?([a-z0-9-]+\\.)*${escaped}(\\/|$)`).test(url);
+  });
 }
 
 test.describe('Broken links', () => {

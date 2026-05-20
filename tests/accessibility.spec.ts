@@ -1,7 +1,8 @@
 import { test, expect } from '@playwright/test';
 import AxeBuilder from '@axe-core/playwright';
+import pages from '../test-data/pages.json';
 
-const pagesToCheck = ['/', '/about-us/', '/contact-us/', '/accommodation/'];
+const pagesToCheck = pages.smoke.map(p => p.path);
 
 test.describe('Accessibility (axe-core)', () => {
   for (const pagePath of pagesToCheck) {
@@ -36,8 +37,9 @@ test.describe('Accessibility (axe-core)', () => {
     const interactives = page.locator('a, button, input, select, textarea, [tabindex]');
     const count = await interactives.count();
 
+    const MAX_FOCUS_CHECK = Number(process.env.MAX_FOCUS_CHECK) || 30;
     const notFocusable: string[] = [];
-    for (let i = 0; i < Math.min(count, 30); i++) {
+    for (let i = 0; i < Math.min(count, MAX_FOCUS_CHECK); i++) {
       const el = interactives.nth(i);
       const tabindex = await el.getAttribute('tabindex');
       if (tabindex === '-1') continue;

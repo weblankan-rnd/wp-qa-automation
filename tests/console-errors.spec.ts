@@ -1,6 +1,7 @@
 import { test, expect } from '@playwright/test';
+import pages from '../test-data/pages.json';
 
-const pagesToCheck = ['/', '/about-us/', '/contact-us/', '/accommodation/'];
+const pagesToCheck = pages.smoke.map(p => p.path);
 
 // Errors to ignore — common WP third-party noise
 const ignoredPatterns = [
@@ -28,10 +29,11 @@ test.describe('Console errors', () => {
       });
 
       page.on('console', msg => {
-        if (msg.type() === 'error') {
-          const text = msg.text();
+        const type = msg.type();
+        const text = msg.text();
+        if (type === 'error' || (type === 'warning' && /error|exception|fail|out of memory/i.test(text))) {
           if (!shouldIgnore(text)) {
-            errors.push(`[console.error] ${text}`);
+            errors.push(`[console.${type}] ${text}`);
           }
         }
       });
@@ -96,9 +98,12 @@ test.describe('Console errors', () => {
     await page.goto('/');
     await page.waitForLoadState('networkidle');
 
-    if (deprecations.length > 0) {
+    const FAIL_ON_DEPRECATED = process.env.FAIL_ON_DEPRECATED === 'true';
+
+    if (FAIL_ON_DEPRECATED) {
+      expect(deprecations, `Deprecated API warnings:\n${deprecations.join('\n')}`).toHaveLength(0);
+    } else if (deprecations.length > 0) {
       console.warn(`Deprecated API warnings:\n${deprecations.join('\n')}`);
     }
-    // Warn only — deprecations are non-blocking
   });
 });

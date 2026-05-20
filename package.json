@@ -19,16 +19,17 @@
     "test:a11y": "playwright test tests/accessibility.spec.ts",
     "test:perf": "playwright test tests/performance.spec.ts",
     "test:console": "playwright test tests/console-errors.spec.ts",
+    "test:buttons": "playwright test tests/buttons.spec.ts",
+    "test:broken-links": "playwright test tests/broken-links.spec.ts",
     "test:smoke": "playwright test --grep @smoke",
     "test:staging": "ENVIRONMENT=staging playwright test",
     "test:live": "ENVIRONMENT=live playwright test --grep @smoke"
   },
-  "dependencies": {
-    "dotenv": "^16.4.5"
-  },
   "devDependencies": {
-    "@playwright/test": "^1.45.0",
     "@axe-core/playwright": "^4.9.1",
+    "@playwright/test": "^1.45.0",
+    "@types/node": "^25.9.1",
+    "dotenv": "^16.4.5",
     "typescript": "^5.5.3"
   }
 }

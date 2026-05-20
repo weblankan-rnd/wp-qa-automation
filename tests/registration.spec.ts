@@ -63,9 +63,11 @@ test.describe('Registration', () => {
     await submit.click();
 
     const error = page.locator('#login_error, .notice-error, .error, [class*="error-message"], [aria-live="assertive"]');
-    const hasError = await error.count() > 0;
     const stillOnRegPage = page.url().includes('register') || page.url().includes('action=register');
-    expect(hasError || stillOnRegPage).toBeTruthy();
+    expect(stillOnRegPage, 'Form submission navigated away from registration page').toBe(true);
+    if (await error.count() > 0) {
+      await expect(error.first()).toBeVisible();
+    }
   });
 
   test('invalid email format triggers validation error', async ({ page }) => {

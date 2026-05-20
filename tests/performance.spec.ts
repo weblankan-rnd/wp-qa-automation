@@ -48,7 +48,6 @@ test.describe('Performance smoke checks', () => {
       });
     });
 
-    const LCP_THRESHOLD_MS = 2500;
     if (lcp > LCP_THRESHOLD_MS) {
       console.warn(`LCP is ${lcp.toFixed(0)}ms (threshold: ${LCP_THRESHOLD_MS}ms) — consider optimizing hero image or main content`);
     }
@@ -62,7 +61,7 @@ test.describe('Performance smoke checks', () => {
       return entries
         .filter(entry =>
           (entry.initiatorType === 'link' || entry.initiatorType === 'script') &&
-          entry.renderBlockingStatus === 'blocking'
+          (entry as any).renderBlockingStatus === 'blocking'
         )
         .map(entry => entry.name);
     });
@@ -116,10 +115,15 @@ test.describe('Performance smoke checks', () => {
 
     const ttfb = await page.evaluate(() => {
       const nav = performance.getEntriesByType('navigation')[0] as PerformanceNavigationTiming;
-      return nav.responseStart - nav.requestStart;
+      if (!nav) return undefined;
+      return nav.responseStart - nav.fetchStart;
     });
 
-    expect(ttfb, `TTFB is ${ttfb.toFixed(0)}ms — server response is slow`).toBeLessThan(800);
+    if (ttfb === undefined) {
+      console.warn('TTFB measurement not supported in this browser — skipping assertion');
+    } else {
+      expect(ttfb, `TTFB is ${ttfb.toFixed(0)}ms — server response is slow`).toBeLessThan(800);
+    }
   });
 
   test('no 3xx redirect chains on homepage', async ({ page }) => {

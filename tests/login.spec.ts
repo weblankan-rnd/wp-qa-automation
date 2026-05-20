@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test';
 
-const WP_LOGIN = process.env.WP_ADMIN_URL || '/wp-login.php';
+const WP_LOGIN = process.env.WP_LOGIN_URL || '/wp-login.php';
 const USERNAME = process.env.WP_USERNAME || '';
 const PASSWORD = process.env.WP_PASSWORD || '';
 
@@ -24,7 +24,6 @@ test.describe('Login', () => {
     await page.locator('#wp-submit, input[type="submit"]').click();
 
     await page.waitForURL(/wp-admin|dashboard/, { timeout: 10000 });
-    await expect(page).toHaveURL(/wp-admin|dashboard/);
   });
 
   test('failed login shows error message', async ({ page }) => {
