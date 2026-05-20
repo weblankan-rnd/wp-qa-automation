@@ -1,7 +1,34 @@
+# ─── Dependencies ──────────────────────────────────────────────────────────────
 node_modules/
-reports/
+
+# ─── Environment ───────────────────────────────────────────────────────────────
 .env
-*.env.local
+.env.local
+.env.*.local
+
+# ─── Playwright / Test Output ──────────────────────────────────────────────────
+reports/
 playwright-report/
 test-results/
 *.page-cache.json
+
+# ─── OS Artifacts ──────────────────────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+*~
+
+# ─── IDE / Editor ──────────────────────────────────────────────────────────────
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+
+# ─── TypeScript / Build ────────────────────────────────────────────────────────
+dist/
+*.tsbuildinfo
+
+# ─── Misc ──────────────────────────────────────────────────────────────────────
+*.log
+npm-debug.log*
