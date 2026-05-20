@@ -1,7 +1,10 @@
 import { test, expect } from '@playwright/test';
-import pages from '../test-data/pages.json';
+import { readFileSync, existsSync } from 'fs';
 
-const pagesToCheck = pages.smoke.map(p => p.path);
+const cachePath = 'test-data/.page-cache.json';
+const pagesToCheck: string[] = existsSync(cachePath)
+  ? JSON.parse(readFileSync(cachePath, 'utf-8'))
+  : ['/'];
 
 test.describe('Images', () => {
   for (const pagePath of pagesToCheck) {

@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test';
+import { readFileSync, existsSync } from 'fs';
 
 // Set CHECK_LOAD_TIME=true in .env to enforce page load time limits.
 // Default is false — staging/test environments are often slow and would cause false failures.
@@ -8,7 +9,10 @@ const PAGE_LOAD_THRESHOLD_MS = Number(process.env.LOAD_TIME_THRESHOLD_MS) || 300
 const LCP_THRESHOLD_MS = 2500;
 const FID_THRESHOLD_MS = 100;
 
-const pagesToCheck = ['/', '/about-us/', '/contact-us/'];
+const cachePath = 'test-data/.page-cache.json';
+const pagesToCheck: string[] = existsSync(cachePath)
+  ? JSON.parse(readFileSync(cachePath, 'utf-8'))
+  : ['/'];
 
 test.describe('Performance smoke checks', () => {
   for (const pagePath of pagesToCheck) {

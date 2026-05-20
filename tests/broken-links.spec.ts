@@ -1,7 +1,10 @@
 import { test, expect } from '@playwright/test';
-import pages from '../test-data/pages.json';
+import { readFileSync, existsSync } from 'fs';
 
-const pagesToScan = pages.smoke.map(p => p.path);
+const cachePath = 'test-data/.page-cache.json';
+const pagesToScan: string[] = existsSync(cachePath)
+  ? JSON.parse(readFileSync(cachePath, 'utf-8'))
+  : ['/'];
 
 // External domains that block automated requests (rate-limit, 400 bots, or require login).
 // Links to these are visually verified — not checked by automation.

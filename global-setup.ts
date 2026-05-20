@@ -1,4 +1,6 @@
 import dotenv from 'dotenv';
+import { writeFileSync } from 'fs';
+import { getPages } from './test-utils/get-pages';
 
 dotenv.config();
 
@@ -38,6 +40,11 @@ async function globalSetup() {
   }
 
   console.log(`[global-setup] Targeting ${environment}: ${baseUrl}`);
+
+  // Pre-fetch pages from sitemap into cache for test files to read synchronously
+  const pages = await getPages();
+  writeFileSync('test-data/.page-cache.json', JSON.stringify(pages), 'utf-8');
+  console.log(`[global-setup] Discovered ${pages.length} page(s) from sitemap`);
 }
 
 export default globalSetup;

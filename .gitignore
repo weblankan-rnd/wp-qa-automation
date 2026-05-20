@@ -4,3 +4,4 @@ reports/
 *.env.local
 playwright-report/
 test-results/
+*.page-cache.json

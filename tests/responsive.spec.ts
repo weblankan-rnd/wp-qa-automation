@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import pages from '../test-data/pages.json';
+import { readFileSync, existsSync } from 'fs';
 
 const viewports = [
   { name: 'mobile-sm', width: 390, height: 844, label: 'Mobile small (390px)' },
@@ -9,9 +9,13 @@ const viewports = [
   { name: 'desktop', width: 1280, height: 800, label: 'Desktop (1280px)' },
 ];
 
-const pagesToTest = pages.smoke.slice(0, 4).map(p => ({
-  path: p.path,
-  name: p.name,
+const cachePath = 'test-data/.page-cache.json';
+const allPages: string[] = existsSync(cachePath)
+  ? JSON.parse(readFileSync(cachePath, 'utf-8'))
+  : ['/'];
+const pagesToTest = allPages.slice(0, 5).map(path => ({
+  path,
+  name: path === '/' ? 'Homepage' : path.replace(/^\/|\/$/g, '').replace(/-/g, ' '),
 }));
 
 test.describe('Responsive layout', () => {
