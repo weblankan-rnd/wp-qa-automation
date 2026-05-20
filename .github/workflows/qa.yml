@@ -2,24 +2,58 @@ name: QA
 
 on:
   workflow_dispatch:
+    inputs:
+      full_matrix:
+        description: 'Run all 5 browsers (Chrome, Firefox, Safari, Mobile)'
+        required: false
+        default: 'false'
+        type: choice
+        options:
+          - 'false'
+          - 'true'
+      base_url:
+        description: 'Target URL (leave blank for default)'
+        required: false
+        default: 'https://www.weblankan.lk'
 
 jobs:
   smoke-test:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+
       - uses: actions/setup-node@v4
         with:
           node-version: 20
           cache: npm
+
       - run: npm ci
-      - run: npx playwright install --with-deps
-      - run: npm run test:live
+
+      - name: Install browsers
+        run: |
+          if [ "${{ inputs.full_matrix }}" = "true" ]; then
+            npx playwright install --with-deps
+          else
+            npx playwright install chromium --with-deps
+          fi
+
+      - name: Run tests
+        run: npx playwright test
         env:
-          BASE_URL: https://www.weblankan.lk
+          BASE_URL: ${{ inputs.base_url || 'https://www.weblankan.lk' }}
           ENVIRONMENT: live
+          FULL_MATRIX: ${{ inputs.full_matrix || 'false' }}
+
       - uses: actions/upload-artifact@v4
         if: always()
         with:
           name: playwright-report
           path: reports/html/
+          retention-days: 14
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: test-results
+          path: reports/test-results/
+          retention-days: 7
