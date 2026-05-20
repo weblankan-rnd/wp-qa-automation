@@ -23,9 +23,9 @@ test.describe('Responsive Design', () => {
     test(`has viewport meta tag on ${label} @smoke`, async ({ page }) => {
       await page.goto(pagePath, { waitUntil: 'domcontentloaded' });
       const viewport = await page.$eval('meta[name="viewport"]', el => el.getAttribute('content')).catch(() => null);
-      if (!viewport) { console.warn(`[Responsive] Missing viewport meta tag on ${pagePath}`); return; }
+      if (!viewport) { console.error(`[ISSUE][Responsive] Missing viewport meta tag on ${pagePath}`); return; }
       if (!viewport.toLowerCase().includes('width=device-width')) {
-        console.warn(`[Responsive] Viewport meta missing width=device-width on ${pagePath}: "${viewport}"`);
+        console.error(`[ISSUE][Responsive] Viewport meta missing width=device-width on ${pagePath}: "${viewport}"`);
       }
     });
 
@@ -61,7 +61,7 @@ test.describe('Responsive Design', () => {
         }, vp.width);
 
         if (overflow.length > 0) {
-          console.warn(`[Responsive] Horizontal overflow at ${vp.name} on ${pagePath}:\n${overflow.join('\n')}`);
+          console.error(`[ISSUE][Responsive] Horizontal overflow at ${vp.name} on ${pagePath}:\n${overflow.map(s => `  - ${s}`).join('\n')}`);
         }
       });
     }
@@ -84,7 +84,8 @@ test.describe('Responsive Design', () => {
       }
       const hasNav = hamburgerVisible || visibleNavCount > 0;
       if (!hasNav) {
-        console.warn(`[Responsive] No visible navigation found on mobile for ${pagePath}`);
+        const level = isArchivePage(pagePath) ? console.warn : console.error;
+        level(`${isArchivePage(pagePath) ? '[Responsive]' : '[ISSUE][Responsive]'} No visible navigation found on mobile for ${pagePath}`);
       }
     });
 
@@ -111,7 +112,7 @@ test.describe('Responsive Design', () => {
       });
 
       if (tinyText.length > 0) {
-        console.warn(`[Responsive] Text smaller than 12px on mobile (${pagePath}):\n${tinyText.join('\n')}`);
+        console.error(`[ISSUE][Responsive] Text smaller than 12px on mobile (${pagePath}):\n${tinyText.map(s => `  - ${s}`).join('\n')}`);
       }
     });
   }
@@ -133,7 +134,7 @@ test.describe('Responsive Design', () => {
     });
 
     if (oversized.length > 0) {
-      console.warn(`[Responsive] Images wider than viewport on mobile:\n${oversized.join('\n')}`);
+      console.error(`[ISSUE][Responsive] Images wider than viewport on mobile:\n${oversized.map(s => `  - ${s}`).join('\n')}`);
     }
   });
 });

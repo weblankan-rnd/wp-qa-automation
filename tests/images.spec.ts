@@ -21,14 +21,13 @@ test.describe('Images', () => {
       for (let i = 0; i < count; i++) {
         const src = await images.nth(i).getAttribute('src');
         if (!src || src.startsWith('data:')) continue;
-
         if (!src.toLowerCase().endsWith('.webp') && !src.includes('.webp?')) {
           nonWebp.push(src);
         }
       }
 
       if (nonWebp.length > 0) {
-        console.warn(`[Images] Non-WebP images on ${pagePath}:\n${nonWebp.join('\n')}`);
+        console.error(`[ISSUE][Images] Non-WebP images on ${pagePath} (convert to .webp):\n${nonWebp.map(s => `  - ${s}`).join('\n')}`);
       }
     });
   }
@@ -56,9 +55,10 @@ test.describe('Images', () => {
     });
 
     if (bgImages.length > 0) {
-      console.warn(`Non-WebP background images:\n${bgImages.join('\n')}`);
+      console.error(`[ISSUE][Images] Non-WebP CSS background images on homepage (convert to .webp):\n${bgImages.map(s => `  - ${s}`).join('\n')}`);
     }
   });
+
   test('no image exceeds size limit on homepage @smoke', async ({ page, request }) => {
     await page.goto('/', { waitUntil: 'load' });
 
@@ -82,7 +82,7 @@ test.describe('Images', () => {
           if (cl) {
             const sizeKB = parseInt(cl, 10) / 1024;
             if (sizeKB > IMAGE_SIZE_LIMIT_KB) {
-              oversized.push(url + ' \u2014 ' + sizeKB.toFixed(0) + 'KB');
+              oversized.push(`${url} — ${sizeKB.toFixed(0)}KB`);
             }
           }
         } catch {
@@ -92,7 +92,7 @@ test.describe('Images', () => {
     );
 
     if (oversized.length > 0) {
-      console.warn(`[Images] ${oversized.length} image(s) exceed ${IMAGE_SIZE_LIMIT_KB}KB (content issue — fix in WordPress):\n${oversized.join('\n')}`);
+      console.error(`[ISSUE][Images] ${oversized.length} image(s) exceed ${IMAGE_SIZE_LIMIT_KB}KB (compress in WordPress):\n${oversized.map(s => `  - ${s}`).join('\n')}`);
     }
   });
 });

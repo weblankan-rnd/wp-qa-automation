@@ -21,7 +21,7 @@ test.describe('Performance', () => {
       });
 
       if (loadMs > PAGE_LOAD_LIMIT_MS) {
-        console.warn(`[Perf] ${pagePath} loaded in ${loadMs.toFixed(0)}ms (limit: ${PAGE_LOAD_LIMIT_MS}ms)`);
+        console.error(`[ISSUE][Perf] ${pagePath} loaded in ${loadMs.toFixed(0)}ms (limit: ${PAGE_LOAD_LIMIT_MS}ms) — optimize page speed`);
       }
     });
   }
@@ -30,22 +30,20 @@ test.describe('Performance', () => {
     await page.goto('/', { waitUntil: 'load' });
 
     const lcpMs = await page.evaluate(
-      (limit) => {
-        return new Promise<number | null>((resolve) => {
-          const observer = new PerformanceObserver((list) => {
-            const entries = list.getEntries();
-            observer.disconnect();
-            resolve(entries[entries.length - 1].startTime);
-          });
-          observer.observe({ type: 'largest-contentful-paint', buffered: true });
-          setTimeout(() => { observer.disconnect(); resolve(null); }, limit);
+      (limit) => new Promise<number | null>((resolve) => {
+        const observer = new PerformanceObserver((list) => {
+          const entries = list.getEntries();
+          observer.disconnect();
+          resolve(entries[entries.length - 1].startTime);
         });
-      },
+        observer.observe({ type: 'largest-contentful-paint', buffered: true });
+        setTimeout(() => { observer.disconnect(); resolve(null); }, limit);
+      }),
       LCP_LIMIT_MS + 5000
     );
 
     if (lcpMs !== null && lcpMs > LCP_LIMIT_MS) {
-      console.warn(`[Perf] LCP is ${lcpMs.toFixed(0)}ms (limit: ${LCP_LIMIT_MS}ms)`);
+      console.error(`[ISSUE][Perf] LCP is ${lcpMs.toFixed(0)}ms on homepage (limit: ${LCP_LIMIT_MS}ms) — optimize largest content element`);
     }
   });
 
@@ -70,9 +68,9 @@ test.describe('Performance', () => {
 
     const MAX_RENDER_BLOCKING = Number(process.env.MAX_RENDER_BLOCKING) || 8;
     if (renderBlocking.length > MAX_RENDER_BLOCKING) {
-      console.warn(
-        `[Perf] Render-blocking resources (${renderBlocking.length}) exceed limit (${MAX_RENDER_BLOCKING}):\n` +
-        renderBlocking.map((r) => `  ${r.type}: ${r.url}`).join('\n')
+      console.error(
+        `[ISSUE][Perf] ${renderBlocking.length} render-blocking resources (limit: ${MAX_RENDER_BLOCKING}) — add async/defer or inline critical CSS:\n` +
+        renderBlocking.map(r => `  - ${r.type}: ${r.url}`).join('\n')
       );
     }
   });

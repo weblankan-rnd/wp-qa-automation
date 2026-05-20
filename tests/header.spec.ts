@@ -16,9 +16,9 @@ test.describe('Header', () => {
   test('logo is visible in the header @smoke', async ({ page }) => {
     const headerLogo = page.locator('header .navbar-brand img.main-logo').first();
     const visible = await headerLogo.isVisible().catch(() => false);
-    if (!visible) { console.warn('[Header] Header logo is not visible'); return; }
+    if (!visible) { console.error('[ISSUE][Header] Header logo is not visible on homepage'); return; }
     const src = await headerLogo.getAttribute('src');
-    if (!src) console.warn('[Header] Header logo has no src attribute');
+    if (!src) console.error('[ISSUE][Header] Header logo has no src attribute');
   });
 
   test('clicking header logo navigates to home page @smoke', async ({ page }) => {
@@ -29,17 +29,16 @@ test.describe('Header', () => {
     await headerLogo.click();
     await page.waitForLoadState('domcontentloaded');
     const currentUrl = page.url().replace(/\/$/, '');
-    if (currentUrl !== BASE_URL) console.warn(`[Header] Logo click navigated to ${currentUrl}, expected ${BASE_URL}`);
+    if (currentUrl !== BASE_URL) console.error(`[ISSUE][Header] Logo click navigated to "${currentUrl}", expected "${BASE_URL}"`);
   });
 
   test('hamburger menu is present on mobile viewport @smoke', async ({ page }) => {
     await page.setViewportSize({ width: 375, height: 812 });
     await page.goto('/', { waitUntil: 'domcontentloaded' });
-    const hamburger = page.locator('.hamburger-menu');
-    const visible = await hamburger.isVisible().catch(() => false);
-    if (!visible) console.warn('[Header] Hamburger menu is not visible on mobile');
+    const visible = await page.locator('.hamburger-menu').isVisible().catch(() => false);
+    if (!visible) console.error('[ISSUE][Header] Hamburger menu not visible on mobile viewport');
     const logoCount = await page.locator('.hamburger-menu .navbar-brand img').count();
-    if (logoCount === 0) console.warn('[Header] Mobile hamburger menu contains no logo');
+    if (logoCount === 0) console.error('[ISSUE][Header] No logo found inside hamburger menu');
   });
 
   test('mobile menu opens on hamburger click @smoke', async ({ page }) => {
@@ -47,49 +46,42 @@ test.describe('Header', () => {
     await page.goto('/', { waitUntil: 'domcontentloaded' });
     const menuHam = page.locator('.menu-ham');
     const visible = await menuHam.isVisible().catch(() => false);
-    if (!visible) { console.warn('[Header] Hamburger button not visible on mobile'); return; }
+    if (!visible) { console.error('[ISSUE][Header] Hamburger button not visible on mobile'); return; }
     await menuHam.click();
-    const mobileMenu = page.locator('.mobile-menu');
-    const menuVisible = await mobileMenu.isVisible().catch(() => false);
-    if (!menuVisible) console.warn('[Header] Mobile menu did not open after hamburger click');
+    const menuVisible = await page.locator('.mobile-menu').isVisible().catch(() => false);
+    if (!menuVisible) console.error('[ISSUE][Header] Mobile menu did not open after hamburger click');
   });
 
   test('mobile menu logo navigates to home page @smoke', async ({ page }) => {
     await page.setViewportSize({ width: 375, height: 812 });
     await page.goto('/contact-us/', { waitUntil: 'domcontentloaded' });
     const menuHam = page.locator('.menu-ham');
-    const hamVisible = await menuHam.isVisible().catch(() => false);
-    if (!hamVisible) { console.warn('[Header] Hamburger button not visible on /contact-us/'); return; }
+    if (!(await menuHam.isVisible().catch(() => false))) { console.warn('[Header] Hamburger not visible on /contact-us/'); return; }
     await menuHam.click();
     const mobileLogo = page.locator('.hamburger-menu .navbar-brand');
-    const logoVisible = await mobileLogo.isVisible().catch(() => false);
-    if (!logoVisible) { console.warn('[Header] Mobile logo not visible after opening menu'); return; }
+    if (!(await mobileLogo.isVisible().catch(() => false))) { console.error('[ISSUE][Header] Mobile logo not visible after opening menu'); return; }
     await mobileLogo.click();
     await page.waitForLoadState('domcontentloaded');
     const currentUrl = page.url().replace(/\/$/, '');
-    if (currentUrl !== BASE_URL) console.warn(`[Header] Mobile logo navigated to ${currentUrl}, expected ${BASE_URL}`);
+    if (currentUrl !== BASE_URL) console.error(`[ISSUE][Header] Mobile logo navigated to "${currentUrl}", expected "${BASE_URL}"`);
   });
 
   for (const pagePath of pagesToCheck.slice(0, 5)) {
     const label = pagePath === '/' ? 'homepage' : pagePath;
-
     test(`active state is shown for current page on ${label} @smoke`, async ({ page }) => {
       await page.goto(pagePath, { waitUntil: 'domcontentloaded' });
       const activeLink = page.locator('header .current-menu-item a, header .current_page_item a').first();
-      const activeInMobile = page.locator('.mobile-menu .current-menu-item a, .mobile-menu .current_page_item a').first();
-
       const desktopActive = await activeLink.isVisible().catch(() => false);
       if (desktopActive) {
         const text = await activeLink.textContent();
-        if (!text?.trim()) console.warn(`[Header] Active link on ${pagePath} has no visible text`);
+        if (!text?.trim()) console.error(`[ISSUE][Header] Active menu link has no visible text on ${pagePath}`);
       }
-
       const menuHamVisible = await page.locator('.menu-ham').isVisible().catch(() => false);
       if (menuHamVisible) {
         await page.locator('.menu-ham').click();
         await page.locator('.mobile-menu').waitFor({ state: 'visible', timeout: 3000 }).catch(() => {});
-        const mobileActiveExists = await activeInMobile.count();
-        if (mobileActiveExists === 0) console.warn(`[Header] No active menu item found on mobile for ${pagePath}`);
+        const mobileActiveExists = await page.locator('.mobile-menu .current-menu-item a, .mobile-menu .current_page_item a').count();
+        if (mobileActiveExists === 0) console.error(`[ISSUE][Header] No active menu item in mobile menu on ${pagePath}`);
       }
     });
   }
@@ -97,19 +89,16 @@ test.describe('Header', () => {
   test('logo is visible in header on all pages @smoke', async ({ page }) => {
     for (const pagePath of pagesToCheck.slice(0, 5)) {
       await page.goto(pagePath, { waitUntil: 'domcontentloaded' });
-      const logo = page.locator('header .navbar-brand img.main-logo').first();
-      const hamburgerLogo = page.locator('.hamburger-menu .navbar-brand img').first();
-      const desktopLogoVisible = await logo.isVisible().catch(() => false);
-      const mobileLogoExists = await hamburgerLogo.count();
+      const desktopLogoVisible = await page.locator('header .navbar-brand img.main-logo').first().isVisible().catch(() => false);
+      const mobileLogoExists = await page.locator('.hamburger-menu .navbar-brand img').count();
       if (!desktopLogoVisible && mobileLogoExists === 0) {
-        console.warn(`[Header] No logo found on ${pagePath} in either desktop header or hamburger menu`);
+        console.error(`[ISSUE][Header] No logo found on ${pagePath} (checked desktop header and hamburger menu)`);
       }
     }
   });
 
   test('clicking header logo from any page opens home page @smoke', async ({ page }) => {
-    const testPages = pagesToCheck.filter((p: string) => p !== '/').slice(0, 3);
-    for (const pagePath of testPages) {
+    for (const pagePath of pagesToCheck.filter((p: string) => p !== '/').slice(0, 3)) {
       await page.goto(pagePath, { waitUntil: 'domcontentloaded' });
       const headerLogo = page.locator('header .navbar-brand').first();
       if (!(await headerLogo.isVisible().catch(() => false))) continue;
@@ -117,7 +106,7 @@ test.describe('Header', () => {
       await page.waitForLoadState('domcontentloaded');
       const currentUrl = page.url().replace(/\/$/, '');
       if (currentUrl !== BASE_URL) {
-        console.warn(`[Header] Clicking logo on ${pagePath} navigated to ${currentUrl}, expected ${BASE_URL}`);
+        console.error(`[ISSUE][Header] Logo click on ${pagePath} navigated to "${currentUrl}", expected "${BASE_URL}"`);
       }
     }
   });
