@@ -22,6 +22,13 @@
     "test:buttons": "playwright test tests/buttons.spec.ts",
     "test:broken-links": "playwright test tests/broken-links.spec.ts",
     "test:images": "playwright test tests/images.spec.ts",
+    "test:chrome": "playwright test --project 'Desktop Chrome' --project 'Mobile Chrome'",
+    "test:firefox": "playwright test --project 'Desktop Firefox'",
+    "test:safari": "playwright test --project 'Desktop Safari' --project 'Mobile Safari'",
+    "test:webkit": "playwright test --project 'Desktop Safari' --project 'Mobile Safari'",
+    "test:desktop": "playwright test --project 'Desktop Chrome' --project 'Desktop Firefox' --project 'Desktop Safari'",
+    "test:mobile": "playwright test --project 'Mobile Chrome' --project 'Mobile Safari'",
+    "test:browser": "playwright test --project",
     "test:smoke": "playwright test --grep @smoke",
     "test:staging": "ENVIRONMENT=staging playwright test",
     "test:live": "ENVIRONMENT=live playwright test"
