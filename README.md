@@ -1,203 +1,137 @@
 # WordPress QA Agent — Playwright Test Suite
 
-Automated frontend QA suite for WordPress sites. Detects pages automatically from the sitemap and runs tests across 5 browser projects (Chrome, Firefox, Safari, Mobile Chrome, Mobile Safari).
+Automated frontend QA suite for WordPress sites. Discovers pages automatically from the sitemap and runs tests across 5 browser projects (Chrome, Firefox, Safari, Mobile Chrome, Mobile Safari).
 
 ---
 
 ## Quick Start
 
 ```bash
-# 1. Install dependencies
 npm install
-
-# 2. Install Playwright browsers
 npx playwright install
-
-# 3. Configure your target site
 cp .env.example .env
-
-# 4. Run all tests
 npm run test:live
-
-# 5. View HTML report
 npm run test:report
 ```
 
 ---
 
-## Environment Setup
+## What Gets Tested
 
-Copy `.env.example` to `.env`:
-
-| Variable              | Default                   | Description                                     |
-|-----------------------|---------------------------|-------------------------------------------------|
-| `BASE_URL`            | `https://www.weblankan.lk`| Target WordPress site URL (no trailing slash)    |
-| `ENVIRONMENT`         | `live`                    | `live` — excludes destructive tests             |
-| `WP_LOGIN_URL`        | `/wp-login.php`           | WP login page path                              |
-| `CHECK_LOAD_TIME`     | `false`                   | Fail tests when page loads exceed threshold     |
-| `LOAD_TIME_THRESHOLD_MS` | `3000`                 | Max page load time in ms                        |
-| `IMAGE_SIZE_LIMIT_KB` | `600`                     | Max image file size before test fails           |
-| `FAIL_ON_DEPRECATED`  | `false`                   | Fail tests on deprecated API warnings           |
-| `MAX_FOCUS_CHECK`     | `30`                      | Max interactive elements to check for focus     |
+| Spec | What it checks |
+|------|----------------|
+| `header` | Logo visible & links home, nav menu has links, mobile hamburger opens, header stays visible after scroll, all header links return < 400 |
+| `footer` | Footer visible on all pages, copyright text, social links, widget areas, all footer links return < 400 |
+| `navigation` | Nav links resolve without 4xx/5xx, clicking loads valid pages, dropdowns appear on hover, active page highlighted |
+| `buttons` | CTA buttons visible with text/label, button links resolve, submit buttons have proper type, disabled buttons unclickable, back-to-top works |
+| `responsive` | No horizontal overflow at 5 viewports (390-1280px), header/footer/main visible at each, hamburger or nav on mobile, images don't overflow, font ≥ 14px, touch targets ≥ 44px |
+| `seo` | Title (5-70 chars), meta description (10-160 chars), canonical URL, exactly one H1, OG tags, robots noindex, images have alt, sitemap.xml accessible, robots.txt accessible |
+| `broken-links` | Every `<a>` and `<img>` on every page returns < 400, sitemap URLs resolve |
+| `console-errors` | Zero JS errors, zero failed network requests, no mixed content warnings, deprecated API warnings (opt-in fail) |
+| `accessibility` | Zero axe-core critical violations (WCAG 2.1 AA), keyboard focusable elements, color contrast (warn), skip nav link present, form fields have labels |
+| `performance` | Load time < 3s (opt-in fail), LCP < 2.5s, no render-blocking resources, page weight < 5MB, lazy loading, TTFB < 800ms, no redirect chains |
+| `images` | All `<img>` src must be `.webp`, no image exceeds size limit (default 600KB), CSS background images warn if not WebP |
+| `login` | Login form visible, remember me checkbox toggleable, lost password link present (UI-only smoke, no credentials) |
+| `forms` | Form visible, text fields accept input, validation errors show, file upload works, radio/checkbox selectable with labels, URL input validates |
+| `registration` | Reg page loads, fields work, empty form shows error, invalid email rejected, password strength indicator (staging only) |
 
 ---
 
-## Test Commands
+## Environment
 
-| Command                   | What it runs                                        |
-|---------------------------|-----------------------------------------------------|
-| `npm run test:live`       | All tests (minus destructive) on live site          |
-| `npm test`                | All tests, all browsers                             |
-| `npm run test:smoke`      | Only `@smoke` tagged tests                          |
-| `npm run test:headed`     | All tests with visible browser                      |
-| `npm run test:ui`         | Playwright interactive UI                           |
-| `npm run test:report`     | Open last HTML report                               |
+```bash
+cp .env.example .env
+```
+
+| Variable | Default | Description |
+|---|---|---|
+| `BASE_URL` | `https://www.weblankan.lk` | Target site (no trailing slash) |
+| `ENVIRONMENT` | `live` | `live` = safe mode, excludes destructive tests |
+| `WP_LOGIN_URL` | `/wp-login.php` | Login page path |
+| `CHECK_LOAD_TIME` | `false` | Fail tests on slow page loads |
+| `LOAD_TIME_THRESHOLD_MS` | `3000` | Max load time in ms |
+| `IMAGE_SIZE_LIMIT_KB` | `600` | Max image file size |
+| `FAIL_ON_DEPRECATED` | `false` | Fail on deprecated API warnings |
+| `MAX_FOCUS_CHECK` | `30` | Max elements to check for keyboard focus |
+
+---
+
+## Commands
+
+### General
+
+| Command | Runs |
+|---|---|
+| `npm run test:live` | All tests (safe), live env |
+| `npm test` | All tests, all browsers |
+| `npm run test:headed` | Visible browser |
+| `npm run test:ui` | Playwright UI mode |
+| `npm run test:report` | Open HTML report |
+| `npm run test:smoke` | Only `@smoke` tagged |
 
 ### By category
 
-| Command                       | What it runs                        |
-|-------------------------------|-------------------------------------|
-| `npm run test:header`         | Header tests                        |
-| `npm run test:footer`         | Footer tests                        |
-| `npm run test:nav`            | Navigation tests                    |
-| `npm run test:buttons`        | CTA button tests                    |
-| `npm run test:responsive`     | Responsive layout across viewports  |
-| `npm run test:seo`            | SEO meta tags, OG, canonical        |
-| `npm run test:links`          | Broken link scanner                 |
-| `npm run test:console`        | Console errors & failed requests    |
-| `npm run test:a11y`           | Accessibility (axe-core WCAG 2.1 AA)|
-| `npm run test:perf`           | Performance smoke checks            |
-| `npm run test:images`         | WebP format & image size checks     |
-| `npm run test:login`          | Login page UI smoke checks          |
-| `npm run test:forms`          | Forms, upload, radio, checkbox, URL |
-| `npm run test:registration`   | Registration tests (staging only)   |
+`npm run test:<name>` where `name` is: `header`, `footer`, `nav`, `buttons`, `responsive`, `seo`, `links`, `console`, `a11y`, `perf`, `images`, `login`, `forms`, `registration`
 
 ### By browser
 
-| Command                       | What it runs                                |
-|-------------------------------|---------------------------------------------|
-| `npm run test:chrome`         | Desktop Chrome + Mobile Chrome              |
-| `npm run test:firefox`        | Desktop Firefox                             |
-| `npm run test:safari`         | Desktop Safari + Mobile Safari              |
-| `npm run test:desktop`        | All 3 desktop browsers                      |
-| `npm run test:mobile`         | Both mobile browsers                        |
-| `npm run test:browser <name>` | Single project (e.g. `"Desktop Chrome"`)    |
-| `npm run live:chrome`         | Chrome only, live environment               |
-| `npm run live:firefox`        | Firefox only, live environment              |
-| `npm run live:safari`         | Safari only, live environment               |
-| `npm run live:desktop`        | Desktop only, live environment              |
-| `npm run live:mobile`         | Mobile only, live environment               |
-| `npm run live:browser <name>` | Single project, live environment            |
+| Command | Runs on |
+|---|---|
+| `npm run test:chrome` | Desktop + Mobile Chrome |
+| `npm run test:firefox` | Desktop Firefox |
+| `npm run test:safari` | Desktop + Mobile Safari |
+| `npm run test:desktop` | All 3 desktop browsers |
+| `npm run test:mobile` | Both mobile |
+| `npm run test:browser <name>` | Single project by name |
+
+Prefix with `live:` to also set `ENVIRONMENT=live`:
+`npm run live:chrome`, `live:firefox`, `live:safari`, `live:desktop`, `live:mobile`, `live:browser <name>`
 
 ---
 
-## Test Coverage
+## Safety
 
-| Spec File                 | Category              | Live-safe |
-|---------------------------|-----------------------|:---------:|
-| `header.spec.ts`          | Header                | ✅        |
-| `footer.spec.ts`          | Footer                | ✅        |
-| `navigation.spec.ts`      | Navigation            | ✅        |
-| `buttons.spec.ts`         | Buttons / CTAs        | ✅        |
-| `responsive.spec.ts`      | Responsive layout     | ✅        |
-| `seo.spec.ts`             | SEO basics            | ✅        |
-| `broken-links.spec.ts`    | Broken links          | ✅        |
-| `console-errors.spec.ts`  | JS errors             | ✅        |
-| `accessibility.spec.ts`   | WCAG 2.1 AA           | ✅        |
-| `performance.spec.ts`     | Performance smoke     | ✅        |
-| `images.spec.ts`          | WebP format & size    | ✅        |
-| `login.spec.ts`           | Login page UI         | ✅        |
-| `forms.spec.ts`           | Forms (staging only)  | ❌        |
-| `registration.spec.ts`    | Registration          | ❌        |
+- `ENVIRONMENT=live` excludes `forms.spec.ts`, `registration.spec.ts`, `login.spec.ts` via `testIgnore` in config
+- Those files also have runtime `test.skip(ENVIRONMENT === 'live')` guards
+- `global-setup.ts` validates domain vs environment:
+  - `hostweblankan.in` → must be `staging`
+  - Any other domain → must be `live`
+  - Mismatch aborts the entire run with a clear error
+
+---
+
+## Page Discovery
+
+Pages are not hardcoded. On every run, `global-setup.ts` fetches `BASE_URL/sitemap.xml`, extracts all `<loc>` paths, and caches them to `test-data/.page-cache.json`. Tests for SEO, broken links, console errors, accessibility, and images generate one test per discovered page. Falls back to `['/']` if sitemap is unavailable.
 
 ---
 
 ## Project Structure
 
 ```
-wordpress-qa-agent/
-├── tests/                    # All Playwright spec files
-│   ├── header.spec.ts
-│   ├── footer.spec.ts
-│   ├── navigation.spec.ts
-│   ├── buttons.spec.ts
-│   ├── responsive.spec.ts
-│   ├── seo.spec.ts
-│   ├── broken-links.spec.ts
-│   ├── console-errors.spec.ts
-│   ├── accessibility.spec.ts
-│   ├── performance.spec.ts
-│   ├── images.spec.ts
-│   ├── login.spec.ts
-│   ├── forms.spec.ts
-│   └── registration.spec.ts
-├── test-utils/
-│   ├── check-links.ts        # Shared link-checking utility
-│   └── get-pages.ts          # Sitemap-based page discovery
-├── test-data/
-│   └── forms.json            # Form selectors and test values
-├── reports/                  # Auto-generated test reports
-├── .github/workflows/
-│   └── qa.yml                # GitHub Actions workflow (manual trigger)
-├── global-setup.ts           # Env validation & sitemap cache
-├── playwright.config.ts      # Playwright config (5 browser projects)
-├── AGENTS.md                 # Rules for Claude/Codex QA agents
-├── .env.example              # Environment template
-└── package.json
+tests/                    # Playwright spec files (14 total)
+test-utils/
+  check-links.ts          # Shared link-checking utility
+  get-pages.ts            # Sitemap-based page discovery
+test-data/
+  forms.json              # Form selectors and test values
+reports/                  # Auto-generated test reports
+.github/workflows/
+  qa.yml                  # Manual-trigger GitHub Actions
+global-setup.ts           # Env validation + sitemap cache
+playwright.config.ts      # 5 browser projects (Chrome, Firefox, Safari x2)
+AGENTS.md                 # QA agent instructions
+.env.example              # Environment template
 ```
 
----
+## CI/CD
 
-## Safety
+Triggered manually from GitHub Actions tab → "QA" → "Run workflow". Runs `npm run test:live` against `https://www.weblankan.lk` with `ENVIRONMENT=live`. Report artifacts uploaded on completion.
 
-Tests tagged `@smoke` are read-only and safe for live sites. Destructive tests (forms, registration, login writes) are excluded when `ENVIRONMENT=live` via both `playwright.config.ts` `testIgnore` and per-test runtime guards.
+## Adding a Test
 
-A `global-setup.ts` validates that the environment matches the domain:
-- `hostweblankan.in` URLs require `ENVIRONMENT=staging`
-- Any other domain requires `ENVIRONMENT=live`
-
----
-
-## Page Discovery
-
-Pages are not hardcoded. On every run, `global-setup.ts` fetches `BASE_URL/sitemap.xml`, extracts all page paths, and caches them to `test-data/.page-cache.json`. Tests like SEO, broken links, console errors, accessibility, and images generate one test per discovered page.
-
----
-
-## CI/CD (GitHub Actions)
-
-```yaml
-# .github/workflows/qa.yml
-name: QA
-on:
-  workflow_dispatch:
-jobs:
-  smoke-test:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with: { node-version: 20, cache: npm }
-      - run: npm ci
-      - run: npx playwright install --with-deps
-      - run: npm run test:live
-        env:
-          BASE_URL: https://www.weblankan.lk
-          ENVIRONMENT: live
-      - uses: actions/upload-artifact@v4
-        if: always()
-        with:
-          name: playwright-report
-          path: reports/html/
-```
-
-Trigger manually from Actions tab → "QA" → "Run workflow".
-
----
-
-## Adding New Tests
-
-1. Create `tests/<category>.spec.ts`
-2. Follow the selector priority in `AGENTS.md`
-3. Tag read-only tests with `@smoke`
-4. Run `npm run test:live` to verify
+1. Create `tests/<name>.spec.ts`
+2. Follow selector priority in `AGENTS.md`
+3. Tag read-only checks with `@smoke`
+4. Add `"test:<name>": "playwright test tests/<name>.spec.ts"` to `package.json`
+5. Run `npm run test:live` to verify
