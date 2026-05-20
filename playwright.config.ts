@@ -6,6 +6,7 @@ dotenv.config();
 const isLive = process.env.ENVIRONMENT === 'live';
 
 export default defineConfig({
+  globalSetup: './global-setup.ts',
   testDir: './tests',
   timeout: 30000,
   expect: { timeout: 5000 },
