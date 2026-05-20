@@ -1,13 +1,12 @@
-name: QA
+name: Live QA Scan
 
 on:
-  push:
-    branches: [main]
   schedule:
-    - cron: '0 6 * * *'
+    - cron: '0 5 * * *'
+  workflow_dispatch:
 
 jobs:
-  test:
+  smoke-test:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -17,10 +16,10 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npx playwright install --with-deps
-      - run: npm run test:staging
+      - run: npm run test:live
         env:
-          BASE_URL: ${{ secrets.STAGING_URL }}
-          ENVIRONMENT: staging
+          BASE_URL: ${{ secrets.LIVE_URL }}
+          ENVIRONMENT: live
       - uses: actions/upload-artifact@v4
         if: always()
         with:
