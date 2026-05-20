@@ -53,9 +53,11 @@ test.describe('Buttons', () => {
         `CTA button ${i} should be enabled`
       ).toBeEnabled();
 
-      await ctaButtons.nth(i).click();
-      await page.waitForLoadState('domcontentloaded');
       const expectedPath = new URL(href).pathname.replace(/\/$/, '') || '/';
+      await Promise.all([
+        page.waitForURL(url => (url.pathname.replace(/\/$/, '') || '/') === expectedPath, { timeout: 10000 }),
+        ctaButtons.nth(i).click(),
+      ]);
       const currentPath = new URL(page.url()).pathname.replace(/\/$/, '') || '/';
       expect(
         currentPath,
