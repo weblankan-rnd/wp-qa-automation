@@ -1,13 +1,14 @@
-import { APIRequestContext, Locator } from '@playwright/test';
+import { Page, Locator } from '@playwright/test';
 
 export async function checkLinks(
-  request: APIRequestContext,
+  page: Page,
   links: Locator,
   baseURL: string
 ): Promise<string[]> {
   const broken: string[] = [];
   const count = await links.count();
 
+  const urls: string[] = [];
   for (let i = 0; i < count; i++) {
     const href = await links.nth(i).getAttribute('href');
     if (
@@ -19,15 +20,25 @@ export async function checkLinks(
     ) {
       continue;
     }
-    const url = href.startsWith('http') ? href : `${baseURL}${href}`;
-    try {
-      const response = await request.get(url);
-      if (response.status() >= 400) {
-        broken.push(`${url} → ${response.status()}`);
-      }
-    } catch {
-      broken.push(`${url} → connection error`);
-    }
+    urls.push(href.startsWith('http') ? href : `${baseURL}${href}`);
   }
-  return broken;
+
+  // Use browser fetch() so requests come from the same context as the page,
+  // bypassing any server-side blocks on standalone API requests.
+  const results: string[] = await page.evaluate(async (checkUrls) => {
+    const out: string[] = [];
+    for (const url of checkUrls) {
+      try {
+        const r = await fetch(url, { method: 'HEAD', signal: AbortSignal.timeout(10000) });
+        if (r.status >= 400) {
+          out.push(`${url} → ${r.status}`);
+        }
+      } catch {
+        out.push(`${url} → connection error`);
+      }
+    }
+    return out;
+  }, urls);
+
+  return results;
 }
