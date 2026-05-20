@@ -20,19 +20,15 @@ npm run test:report
 
 | Spec | What it checks |
 |------|----------------|
-| `header` | Logo visible & links home, nav menu has links, mobile hamburger opens, header stays visible after scroll, all header links return < 400 |
-| `footer` | Footer visible on all pages, copyright text, social links, widget areas, all footer links return < 400 |
-| `navigation` | Nav links resolve without 4xx/5xx, clicking loads valid pages, dropdowns appear on hover, active page highlighted |
-| `buttons` | CTA buttons visible with text/label, button links resolve, submit buttons have proper type, disabled buttons unclickable, back-to-top works |
-| `responsive` | No horizontal overflow at 5 viewports (390-1280px), header/footer/main visible at each, hamburger or nav on mobile, images don't overflow, font ≥ 14px, touch targets ≥ 44px |
-| `seo` | Title (5-70 chars), meta description (10-160 chars), canonical URL, exactly one H1, OG tags, robots noindex, images have alt, sitemap.xml accessible, robots.txt accessible |
-| `broken-links` | Every `<a>` and `<img>` on every page returns < 400, sitemap URLs resolve |
-| `console-errors` | Zero JS errors, zero failed network requests, no mixed content warnings, deprecated API warnings (opt-in fail) |
-| `performance` | Load time < 3s (opt-in fail), LCP < 2.5s, no render-blocking resources, page weight < 5MB, lazy loading, TTFB < 800ms, no redirect chains |
-| `images` | All `<img>` src must be `.webp`, no image exceeds size limit (default 600KB), CSS background images warn if not WebP |
-| `login` | Login form visible, remember me checkbox toggleable, lost password link present (UI-only smoke, no credentials) |
-| `forms` | Form visible, text fields accept input, validation errors show, file upload works, radio/checkbox selectable with labels, URL input validates |
-| `registration` | Reg page loads, fields work, empty form shows error, invalid email rejected, password strength indicator (staging only) |
+| `header` | Logo visible in desktop header and mobile hamburger, clicking logo navigates to home from any page, hamburger menu opens on mobile, active state (`current-menu-item`) shown on current page |
+| `footer` | Footer visible on all pages, footer logo present and navigates to home, footer nav links load correct pages, copyright section with year, social media links (Instagram, LinkedIn) present and open in new tab, Web Lankan link opens in new tab, all external footer links have `target="_blank"`, no spelling mistakes in footer text, phone number format (+94 XX XXX XXXX), email format validation |
+| `navigation` | Desktop header nav links navigate to correct pages, mobile menu links navigate correctly, banner menu links navigate correctly, all internal header links resolve without 4xx/5xx, external links on all pages have `target="_blank"`, active state persists after navigating between pages |
+| `buttons` | CTA buttons visible and clickable, button hrefs are valid URLs, buttons are enabled (no disabled/aria-disabled attr), button text is non-empty and checked for common misspellings, upload field exists on contact page (read-only visibility check), footer contact button clickable on all pages |
+| `responsive` | Viewport meta tag present (width=device-width), no horizontal overflow at 375px/768px/1440px viewports, navigation usable on mobile (hamburger or visible links), text font-size ≥ 12px on mobile, images not wider than viewport on mobile |
+| `seo` | Title length 10–70 chars, meta description 50–160 chars, canonical URL is absolute, Open Graph tags (og:title, og:description, og:image, og:url), exactly one H1 per page, all images have alt attributes, robots meta does not contain noindex on homepage |
+| `broken-links` | All `<a href>` URLs on every page return < 400 status (HEAD + GET fallback), batched with 8s timeout per link |
+| `performance` | Page load time within threshold, LCP element visible, no render-blocking resources, page weight within limit, lazy loading, TTFB threshold, no redirect chains |
+| `images` | All `<img>` src checks for format and size limits |
 
 ---
 
@@ -70,7 +66,14 @@ cp .env.example .env
 
 ### By category
 
-`npm run test:<name>` where `name` is: `header`, `footer`, `nav`, `buttons`, `responsive`, `seo`, `links`, `console`, `a11y`, `perf`, `images`, `login`, `forms`, `registration`
+| Command | Spec file |
+|---------|-----------|
+| `npm run test:images` | `tests/images.spec.ts` |
+| `npm run test:links` | `tests/broken-links.spec.ts` |
+| `npm run test:seo` | `tests/seo.spec.ts` |
+| `npm run test:responsive` | `tests/responsive.spec.ts` |
+
+Run any other spec directly: `npx playwright test tests/<name>.spec.ts`
 
 ### By browser
 
@@ -90,8 +93,7 @@ Prefix with `live:` to also set `ENVIRONMENT=live`:
 
 ## Safety
 
-- `ENVIRONMENT=live` excludes `forms.spec.ts`, `registration.spec.ts`, `login.spec.ts` via `testIgnore` in config
-- Those files also have runtime `test.skip(ENVIRONMENT === 'live')` guards
+- `ENVIRONMENT=live` excludes `forms.spec.ts`, `registration.spec.ts`, `login.spec.ts` via `testIgnore` in config (these files are not yet created but are reserved for staging-only use)
 - `global-setup.ts` validates domain vs environment:
   - `hostweblankan.in` → must be `staging`
   - Any other domain → must be `live`
@@ -108,12 +110,21 @@ Pages are not hardcoded. On every run, `global-setup.ts` fetches `BASE_URL/sitem
 ## Project Structure
 
 ```
-tests/                    # Playwright spec files (14 total)
+tests/                    # Playwright spec files (9 total)
+  header.spec.ts          # Logo, hamburger, active state
+  footer.spec.ts          # Logo, links, copyright, social media, spelling
+  navigation.spec.ts      # Link navigation, external link targets
+  buttons.spec.ts         # CTA visibility, clickability, spelling
+  responsive.spec.ts      # Viewport overflow, mobile nav, text readability
+  seo.spec.ts             # Title, meta, OG tags, H1, alt, robots
+  broken-links.spec.ts    # All hrefs return < 400
+  performance.spec.ts     # Load time, LCP, render-blocking
+  images.spec.ts          # Format and size checks
 test-utils/
   check-links.ts          # Shared link-checking utility
   get-pages.ts            # Sitemap-based page discovery
 test-data/
-  forms.json              # Form selectors and test values
+  .page-cache.json        # Auto-generated page list from sitemap
 reports/                  # Auto-generated test reports
 .github/workflows/
   qa.yml                  # Manual-trigger GitHub Actions
@@ -132,5 +143,4 @@ Triggered manually from GitHub Actions tab → "QA" → "Run workflow". Runs `np
 1. Create `tests/<name>.spec.ts`
 2. Follow selector priority in `AGENTS.md`
 3. Tag read-only checks with `@smoke`
-4. Add `"test:<name>": "playwright test tests/<name>.spec.ts"` to `package.json`
-5. Run `npm run test:live` to verify
+4. Run `npx playwright test tests/<name>.spec.ts` to verify
