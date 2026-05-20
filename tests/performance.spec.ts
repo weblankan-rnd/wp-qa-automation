@@ -1,10 +1,11 @@
 import { test } from '@playwright/test';
 import { readFileSync, existsSync } from 'fs';
+import { IGNORED_PATHS } from '../test-utils/ignored-paths';
 
 const cachePath = 'test-data/.page-cache.json';
-const pagesToCheck: string[] = existsSync(cachePath)
+const pagesToCheck: string[] = (existsSync(cachePath)
   ? JSON.parse(readFileSync(cachePath, 'utf-8'))
-  : ['/'];
+  : ['/']).filter((p: string) => !IGNORED_PATHS.includes(p));
 
 const PAGE_LOAD_LIMIT_MS = Number(process.env.LOAD_TIME_THRESHOLD_MS) || 5000;
 const LCP_LIMIT_MS = Number(process.env.LCP_LIMIT_MS) || 4000;

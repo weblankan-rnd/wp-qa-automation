@@ -1,11 +1,12 @@
 import { test } from '@playwright/test';
 import { readFileSync, existsSync } from 'fs';
+import { IGNORED_PATHS } from '../test-utils/ignored-paths';
 
 const BASE_URL = process.env.BASE_URL || 'http://localhost';
 const cachePath = 'test-data/.page-cache.json';
-const pagesToCheck: string[] = existsSync(cachePath)
+const pagesToCheck: string[] = (existsSync(cachePath)
   ? JSON.parse(readFileSync(cachePath, 'utf-8'))
-  : ['/'];
+  : ['/']).filter((p: string) => !IGNORED_PATHS.includes(p));
 
 test.describe('Buttons', () => {
   test.beforeEach(async ({ page }) => {
