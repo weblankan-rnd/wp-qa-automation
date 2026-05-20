@@ -18,17 +18,93 @@ npm run test:report
 
 ## What Gets Tested
 
-| Spec | What it checks |
-|------|----------------|
-| `header` | Logo visible in desktop header and mobile hamburger, clicking logo navigates to home from any page, hamburger menu opens on mobile, active state (`current-menu-item`) shown on current page |
-| `footer` | Footer visible on all pages, footer logo present and navigates to home, footer nav links load correct pages, copyright section with year, social media links (Instagram, LinkedIn) present and open in new tab, Web Lankan link opens in new tab, all external footer links have `target="_blank"`, no spelling mistakes in footer text, phone number format (+94 XX XXX XXXX), email format validation |
-| `navigation` | Desktop header nav links navigate to correct pages, mobile menu links navigate correctly, banner menu links navigate correctly, all internal header links resolve without 4xx/5xx, external links on all pages have `target="_blank"`, active state persists after navigating between pages |
-| `buttons` | CTA buttons visible and clickable, button hrefs are valid URLs, buttons are enabled (no disabled/aria-disabled attr), button text is non-empty and checked for common misspellings, upload field exists on contact page (read-only visibility check), footer contact button clickable on all pages |
-| `responsive` | Viewport meta tag present (width=device-width), no horizontal overflow at 375px/768px/1440px viewports, navigation usable on mobile (hamburger or visible links), text font-size ≥ 12px on mobile, images not wider than viewport on mobile |
-| `seo` | Title length 10–70 chars, meta description 50–160 chars, canonical URL is absolute, Open Graph tags (og:title, og:description, og:image, og:url), exactly one H1 per page, all images have alt attributes, robots meta does not contain noindex on homepage |
-| `broken-links` | All `<a href>` URLs on every page return < 400 status (HEAD + GET fallback), batched with 8s timeout per link |
-| `performance` | Page load time within threshold, LCP element visible, no render-blocking resources, page weight within limit, lazy loading, TTFB threshold, no redirect chains |
-| `images` | All `<img>` src checks for format and size limits |
+### `header`
+
+- [x] Logo visible in desktop header
+- [x] Logo visible in mobile hamburger menu
+- [x] Clicking logo navigates to home page from any page
+- [x] Hamburger menu opens on mobile
+- [x] Mobile menu logo navigates to home page
+- [x] Active state (`current-menu-item`) shown on current page
+
+### `footer`
+
+- [x] Footer section present on all pages
+- [x] Footer logo visible
+- [x] Clicking footer logo navigates to home page from any page
+- [x] Footer navigation links load correct pages
+- [x] Copyright section present with year
+- [x] Social media links present (Instagram, LinkedIn)
+- [x] Social media links open in new tab (`target="_blank"`)
+- [x] Web Lankan link opens in new tab
+- [x] All external footer links have `rel="noopener noreferrer"`
+- [x] No spelling mistakes in footer text
+- [x] Phone number format (+94 XX XXX XXXX)
+- [x] Email address format validation
+
+### `navigation`
+
+- [x] Desktop header nav links navigate to correct pages
+- [x] Mobile menu links navigate to correct pages
+- [x] Banner menu links navigate to correct pages
+- [x] All internal header links resolve without 4xx/5xx
+- [x] External links on all pages open in new tab
+- [x] Active state persists after navigating between pages
+
+### `buttons`
+
+- [x] CTA buttons visible on homepage
+- [x] CTA buttons have valid href actions
+- [x] CTA buttons are clickable and navigate correctly
+- [x] CTA button text checked for common misspellings
+- [x] Buttons are enabled (no `disabled`/`aria-disabled` attr)
+- [x] Button text is non-empty
+- [x] Upload field exists on contact page (read-only)
+- [x] Upload trigger element is clickable
+- [x] Footer contact button clickable on all pages
+- [x] Buttons accept keyboard focus
+
+### `responsive`
+
+- [x] Viewport meta tag present (`width=device-width`)
+- [x] No horizontal overflow at 375px viewport
+- [x] No horizontal overflow at 768px viewport
+- [x] No horizontal overflow at 1440px viewport
+- [x] Navigation usable on mobile (hamburger or visible links)
+- [x] Text font-size >= 12px on mobile
+- [x] Images not wider than viewport on mobile
+
+### `seo`
+
+- [x] Title length 10–70 chars
+- [x] Meta description 50–160 chars
+- [x] Canonical URL is absolute
+- [x] Open Graph tags present (og:title, og:description, og:image, og:url)
+- [x] Exactly one H1 per page
+- [x] All images have alt attributes
+- [x] Robots meta does not contain `noindex` on homepage
+
+### `broken-links`
+
+- [x] All `<a href>` URLs return < 400 status
+- [x] HEAD request with GET fallback
+- [x] Batched with 8s timeout per link
+- [x] Checks all pages discovered from sitemap
+
+### `performance`
+
+- [x] Page load time within threshold
+- [x] LCP element visible
+- [x] No render-blocking resources
+- [x] Page weight within limit
+- [x] Lazy loading enabled
+- [x] TTFB within threshold
+- [x] No redirect chains
+
+### `images`
+
+- [x] Image format checks
+- [x] Image file size within limit
 
 ---
 
