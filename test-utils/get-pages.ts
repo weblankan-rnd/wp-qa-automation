@@ -5,10 +5,34 @@ const EXCLUDED_PATTERNS = [
   /\/feed\//i,
   /\/trackback\//i,
   /\/xmlrpc\.php/i,
+  /\/wp-sitemap/i,
+  /\/sitemap\.xml/i,
   /\.(jpg|jpeg|png|gif|svg|webp|css|js|pdf|zip|ico)$/i,
 ];
 
 let cachedPages: string[] | null = null;
+
+async function fetchSitemapUrls(url: string): Promise<string[]> {
+  const response = await fetch(url, { signal: AbortSignal.timeout(10000) });
+  if (!response.ok) return [];
+
+  const xml = await response.text();
+  const locs = xml.match(/<loc>([^<]+)<\/loc>/g) || [];
+  const urls = locs.map(m => m.replace(/<\/?loc>/g, '').trim());
+
+  // Check if this is a sitemap index (contains sub-sitemaps)
+  const isIndex = /<sitemapindex\b/i.test(xml);
+  if (isIndex) {
+    const subPaths: string[] = [];
+    for (const subUrl of urls) {
+      const subResults = await fetchSitemapUrls(subUrl);
+      subPaths.push(...subResults);
+    }
+    return subPaths;
+  }
+
+  return urls;
+}
 
 export async function getPages(): Promise<string[]> {
   if (cachedPages) return cachedPages;
@@ -20,12 +44,8 @@ export async function getPages(): Promise<string[]> {
   }
 
   try {
-    const response = await fetch(`${baseUrl}/sitemap.xml`, { signal: AbortSignal.timeout(5000) });
-    if (!response.ok) throw new Error(`Sitemap returned ${response.status}`);
-
-    const xml = await response.text();
-    const locs = xml.match(/<loc>([^<]+)<\/loc>/g) || [];
-    const urls = locs.map(m => m.replace(/<\/?loc>/g, '').trim());
+    const sitemapUrl = `${baseUrl}/sitemap.xml`;
+    const urls = await fetchSitemapUrls(sitemapUrl);
 
     const paths = urls
       .map(url => {
@@ -36,7 +56,8 @@ export async function getPages(): Promise<string[]> {
         p !== '/' &&
         !EXCLUDED_PATTERNS.some(r => r.test(p))
       )
-      .filter((p, i, arr) => arr.indexOf(p) === i);
+      .filter((p, i, arr) => arr.indexOf(p) === i)
+      .slice(0, 20); // cap to avoid timeouts
 
     cachedPages = ['/', ...paths];
     return cachedPages;
