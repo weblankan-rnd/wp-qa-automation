@@ -69,8 +69,10 @@ test.describe('Footer', () => {
     const footerLogo = page.locator('footer .footerlogo').first();
     await footerLogo.scrollIntoViewIfNeeded();
     await expect(footerLogo, 'Footer logo link should be visible').toBeVisible();
-    await footerLogo.click();
-    await page.waitForLoadState('domcontentloaded');
+    await Promise.all([
+      page.waitForURL(url => url.pathname === '/' || url.href.replace(/\/$/, '') === BASE_URL, { timeout: 10000 }),
+      footerLogo.click(),
+    ]);
     const currentUrl = page.url().replace(/\/$/, '');
     expect(currentUrl, 'Clicking footer logo should navigate to home').toBe(BASE_URL);
   });
@@ -81,12 +83,14 @@ test.describe('Footer', () => {
       await page.goto(pagePath, { waitUntil: 'domcontentloaded' });
       const footerLogo = page.locator('footer .footerlogo').first();
       await footerLogo.scrollIntoViewIfNeeded();
-      if (await footerLogo.isVisible().catch(() => false)) {
-        await footerLogo.click();
-        await page.waitForLoadState('domcontentloaded');
-        const currentUrl = page.url().replace(/\/$/, '');
-        expect(currentUrl, `Footer logo on ${pagePath} should navigate to home`).toBe(BASE_URL);
-      }
+      if (!(await footerLogo.isVisible().catch(() => false))) continue;
+
+      await Promise.all([
+        page.waitForURL(url => url.pathname === '/' || url.href.replace(/\/$/, '') === BASE_URL, { timeout: 10000 }),
+        footerLogo.click(),
+      ]);
+      const currentUrl = page.url().replace(/\/$/, '');
+      expect(currentUrl, `Footer logo on ${pagePath} should navigate to home`).toBe(BASE_URL);
     }
   });
 
