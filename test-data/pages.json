@@ -3,11 +3,9 @@
     { "path": "/", "name": "Homepage" },
     { "path": "/about-us/", "name": "About Us" },
     { "path": "/contact-us/", "name": "Contact Us" },
-    { "path": "/accommodation/", "name": "Accommodation" },
-    { "path": "/excursions/", "name": "Excursions" },
-    { "path": "/restaurant-and-bar/", "name": "Restaurant and Bar" },
-    { "path": "/special-offers/", "name": "Special Offers" },
-    { "path": "/gallery/", "name": "Gallery" }
+    { "path": "/our-clients-industries/", "name": "Our Clients Industries" },
+    { "path": "/seo-company/", "name": "SEO Company" },
+    { "path": "/google-ads-company/", "name": "Google Ads Company" }
   ],
   "auth": [
     { "path": "/wp-login.php", "name": "WP Login" },
@@ -17,7 +15,7 @@
     { "path": "/", "name": "Homepage" },
     { "path": "/about-us/", "name": "About Us" },
     { "path": "/contact-us/", "name": "Contact Us" },
-    { "path": "/accommodation/", "name": "Accommodation" }
+    { "path": "/our-clients-industries/", "name": "Our Clients Industries" }
   ],
   "forms": [
     { "path": "/contact-us/", "name": "Contact Form", "formSelector": "form.wpcf7-form, form[data-testid='contact-form'], #contact-form" }
