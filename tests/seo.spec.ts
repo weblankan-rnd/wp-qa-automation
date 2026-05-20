@@ -25,23 +25,23 @@ test.describe('SEO Tags', () => {
       });
 
       await test.step('meta description 50–160 chars', async () => {
-        const desc = await page.getAttribute('meta[name="description"]', 'content');
+        const desc = await page.$eval('meta[name="description"]', el => el.getAttribute('content')).catch(() => null);
         if (!desc) { console.warn(`[SEO] Missing meta description on ${pagePath}`); return; }
         if (desc.length < 50) console.warn(`[SEO] Meta description too short on ${pagePath} (${desc.length} chars)`);
         if (desc.length > 160) console.warn(`[SEO] Meta description too long on ${pagePath} (${desc.length} chars)`);
       });
 
       await test.step('canonical URL is absolute', async () => {
-        const canonical = await page.getAttribute('link[rel="canonical"]', 'href');
+        const canonical = await page.$eval('link[rel="canonical"]', el => el.getAttribute('href')).catch(() => null);
         if (!canonical) { console.warn(`[SEO] Missing canonical tag on ${pagePath}`); return; }
         if (!/^https?:\/\//.test(canonical)) console.warn(`[SEO] Canonical is not absolute on ${pagePath}: ${canonical}`);
       });
 
       await test.step('Open Graph tags present', async () => {
-        const ogTitle = await page.getAttribute('meta[property="og:title"]', 'content');
-        const ogDesc = await page.getAttribute('meta[property="og:description"]', 'content');
-        const ogImage = await page.getAttribute('meta[property="og:image"]', 'content');
-        const ogUrl = await page.getAttribute('meta[property="og:url"]', 'content');
+        const ogTitle = await page.$eval('meta[property="og:title"]', el => el.getAttribute('content')).catch(() => null);
+        const ogDesc = await page.$eval('meta[property="og:description"]', el => el.getAttribute('content')).catch(() => null);
+        const ogImage = await page.$eval('meta[property="og:image"]', el => el.getAttribute('content')).catch(() => null);
+        const ogUrl = await page.$eval('meta[property="og:url"]', el => el.getAttribute('content')).catch(() => null);
         if (!ogTitle) console.warn(`[SEO] Missing og:title on ${pagePath}`);
         if (!ogDesc) console.warn(`[SEO] Missing og:description on ${pagePath}`);
         if (!ogImage) console.warn(`[SEO] Missing og:image on ${pagePath}`);
@@ -67,7 +67,7 @@ test.describe('SEO Tags', () => {
 
       if (pagePath === '/') {
         await test.step('robots meta does not contain noindex', async () => {
-          const robots = await page.getAttribute('meta[name="robots"]', 'content');
+          const robots = await page.$eval('meta[name="robots"]', el => el.getAttribute('content')).catch(() => null);
           if (robots?.toLowerCase().includes('noindex')) {
             console.warn(`[SEO] Homepage robots meta contains noindex: "${robots}"`);
           }

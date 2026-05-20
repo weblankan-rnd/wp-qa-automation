@@ -21,7 +21,7 @@ test.describe('Responsive Design', () => {
 
     test(`has viewport meta tag on ${label} @smoke`, async ({ page }) => {
       await page.goto(pagePath, { waitUntil: 'domcontentloaded' });
-      const viewport = await page.getAttribute('meta[name="viewport"]', 'content');
+      const viewport = await page.$eval('meta[name="viewport"]', el => el.getAttribute('content')).catch(() => null);
       if (!viewport) { console.warn(`[Responsive] Missing viewport meta tag on ${pagePath}`); return; }
       if (!viewport.toLowerCase().includes('width=device-width')) {
         console.warn(`[Responsive] Viewport meta missing width=device-width on ${pagePath}: "${viewport}"`);
