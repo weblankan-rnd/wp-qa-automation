@@ -8,16 +8,20 @@ const pagesToScan: string[] = existsSync(cachePath)
 
 // External domains that block automated requests (rate-limit, 400 bots, or require login).
 // Links to these are visually verified — not checked by automation.
-const ignoredDomains = [
+// External domains that block automated requests (rate-limit, return 400, or require login).
+// Links to these are visually verified — not checked by automation.
+const ignoredHostSuffixes = [
   'facebook.com',
+  'fb.com',
   'instagram.com',
   'twitter.com',
   'x.com',
   'youtube.com',
   'linkedin.com',
+  'snapchat.com',
+  'pinterest.com',
   'maps.app.goo.gl',
-  'google.com/maps',
-  'maps.google.com',
+  'google.com',
   'wa.me',
   'whatsapp.com',
   'weblankan.com',
@@ -26,10 +30,15 @@ const ignoredDomains = [
 ];
 
 function isIgnored(url: string): boolean {
-  return ignoredDomains.some(domain => {
-    const escaped = domain.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-    return new RegExp(`(^https?:\\/\\/)?([a-z0-9-]+\\.)*${escaped}(\\/|$)`).test(url);
-  });
+  let hostname: string;
+  try {
+    hostname = new URL(url).hostname.toLowerCase();
+  } catch {
+    return false;
+  }
+  return ignoredHostSuffixes.some(suffix =>
+    hostname === suffix || hostname.endsWith('.' + suffix)
+  );
 }
 
 test.describe('Broken links', () => {
