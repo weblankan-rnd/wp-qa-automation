@@ -31,7 +31,13 @@
     "test:browser": "playwright test --project",
     "test:smoke": "playwright test --grep @smoke",
     "test:staging": "ENVIRONMENT=staging playwright test",
-    "test:live": "ENVIRONMENT=live playwright test"
+    "test:live": "ENVIRONMENT=live playwright test",
+    "live:chrome": "ENVIRONMENT=live playwright test --project 'Desktop Chrome' --project 'Mobile Chrome'",
+    "live:firefox": "ENVIRONMENT=live playwright test --project 'Desktop Firefox'",
+    "live:safari": "ENVIRONMENT=live playwright test --project 'Desktop Safari' --project 'Mobile Safari'",
+    "live:desktop": "ENVIRONMENT=live playwright test --project 'Desktop Chrome' --project 'Desktop Firefox' --project 'Desktop Safari'",
+    "live:mobile": "ENVIRONMENT=live playwright test --project 'Mobile Chrome' --project 'Mobile Safari'",
+    "live:browser": "ENVIRONMENT=live playwright test --project"
   },
   "devDependencies": {
     "@axe-core/playwright": "^4.9.1",

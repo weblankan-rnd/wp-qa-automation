@@ -82,6 +82,12 @@ Copy `.env.example` to `.env`:
 | `npm run test:desktop`        | All 3 desktop browsers                      |
 | `npm run test:mobile`         | Both mobile browsers                        |
 | `npm run test:browser <name>` | Single project (e.g. `"Desktop Chrome"`)    |
+| `npm run live:chrome`         | Chrome only, live environment               |
+| `npm run live:firefox`        | Firefox only, live environment              |
+| `npm run live:safari`         | Safari only, live environment               |
+| `npm run live:desktop`        | Desktop only, live environment              |
+| `npm run live:mobile`         | Mobile only, live environment               |
+| `npm run live:browser <name>` | Single project, live environment            |
 
 ---
 
