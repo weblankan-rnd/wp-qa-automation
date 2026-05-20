@@ -28,7 +28,6 @@ npm run test:report
 | `seo` | Title (5-70 chars), meta description (10-160 chars), canonical URL, exactly one H1, OG tags, robots noindex, images have alt, sitemap.xml accessible, robots.txt accessible |
 | `broken-links` | Every `<a>` and `<img>` on every page returns < 400, sitemap URLs resolve |
 | `console-errors` | Zero JS errors, zero failed network requests, no mixed content warnings, deprecated API warnings (opt-in fail) |
-| `accessibility` | Zero axe-core critical violations (WCAG 2.1 AA), keyboard focusable elements, color contrast (warn), skip nav link present, form fields have labels |
 | `performance` | Load time < 3s (opt-in fail), LCP < 2.5s, no render-blocking resources, page weight < 5MB, lazy loading, TTFB < 800ms, no redirect chains |
 | `images` | All `<img>` src must be `.webp`, no image exceeds size limit (default 600KB), CSS background images warn if not WebP |
 | `login` | Login form visible, remember me checkbox toggleable, lost password link present (UI-only smoke, no credentials) |
