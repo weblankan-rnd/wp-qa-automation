@@ -10,6 +10,10 @@ const EXCLUDED_PATTERNS = [
   /\.(jpg|jpeg|png|gif|svg|webp|css|js|pdf|zip|ico)$/i,
 ];
 
+const IGNORED_PATHS = [
+  '/hello-world/',
+];
+
 let cachedPages: string[] | null = null;
 
 async function fetchSitemapUrls(url: string): Promise<string[]> {
@@ -54,7 +58,8 @@ export async function getPages(): Promise<string[]> {
       .filter((p): p is string =>
         p !== null &&
         p !== '/' &&
-        !EXCLUDED_PATTERNS.some(r => r.test(p))
+        !EXCLUDED_PATTERNS.some(r => r.test(p)) &&
+        !IGNORED_PATHS.includes(p)
       )
       .filter((p, i, arr) => arr.indexOf(p) === i)
       .slice(0, 20); // cap to avoid timeouts
