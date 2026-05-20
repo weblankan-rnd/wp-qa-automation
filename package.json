@@ -21,6 +21,7 @@
     "test:console": "playwright test tests/console-errors.spec.ts",
     "test:buttons": "playwright test tests/buttons.spec.ts",
     "test:broken-links": "playwright test tests/broken-links.spec.ts",
+    "test:images": "playwright test tests/images.spec.ts",
     "test:smoke": "playwright test --grep @smoke",
     "test:staging": "ENVIRONMENT=staging playwright test",
     "test:live": "ENVIRONMENT=live playwright test"
