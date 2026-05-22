@@ -87,17 +87,21 @@ test.describe('Header', () => {
   }
 
   test('logo is visible in header on all pages @smoke', async ({ page }) => {
+    const missing: string[] = [];
     for (const pagePath of pagesToCheck.slice(0, 5)) {
       await page.goto(pagePath, { waitUntil: 'domcontentloaded' });
-      const desktopLogoVisible = await page.locator('header .navbar-brand img.main-logo').first().isVisible().catch(() => false);
-      const mobileLogoExists = await page.locator('.hamburger-menu .navbar-brand img').count();
-      if (!desktopLogoVisible && mobileLogoExists === 0) {
-        expect.soft(false, `[Header] No logo found on ${pagePath} (checked desktop header and hamburger menu)`).toBeTruthy();
+      const desktopLogoVisible = await page.locator('header .navbar-brand img').first().isVisible().catch(() => false);
+      if (!desktopLogoVisible) {
+        missing.push(pagePath);
       }
+    }
+    if (missing.length > 0) {
+      expect(false, `[Header] No logo found on these pages:\n${missing.map(p => `  - ${p}`).join('\n')}`).toBeTruthy();
     }
   });
 
   test('clicking header logo from any page opens home page @smoke', async ({ page }) => {
+    const errors: string[] = [];
     for (const pagePath of pagesToCheck.filter((p: string) => p !== '/').slice(0, 3)) {
       await page.goto(pagePath, { waitUntil: 'domcontentloaded' });
       const headerLogo = page.locator('header .navbar-brand').first();
@@ -106,8 +110,11 @@ test.describe('Header', () => {
       await page.waitForLoadState('domcontentloaded');
       const currentUrl = page.url().replace(/\/$/, '');
       if (currentUrl !== BASE_URL) {
-        expect.soft(false, `[Header] Logo click on ${pagePath} navigated to "${currentUrl}", expected "${BASE_URL}"`).toBeTruthy();
+        errors.push(`Logo click on ${pagePath} navigated to "${currentUrl}", expected "${BASE_URL}"`);
       }
+    }
+    if (errors.length > 0) {
+      expect(false, `[Header] ${errors.join(' | ')}`).toBeTruthy();
     }
   });
 });
