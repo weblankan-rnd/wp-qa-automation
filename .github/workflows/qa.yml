@@ -14,7 +14,7 @@ on:
       base_url:
         description: 'Target URL (leave blank for default)'
         required: false
-        default: 'https://www.weblankan.lk'
+        default: 'https://supercorals.hostweblankan.in'
 
 jobs:
   smoke-test:
