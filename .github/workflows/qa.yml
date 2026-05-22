@@ -16,7 +16,7 @@ on:
         required: false
         default: 'https://supercorals.hostweblankan.in'
       pages:
-        description: 'Pages to test (one per line, e.g. / or /about-us/). Leave blank to auto-discover via sitemap.'
+        description: 'Pages to test (one per line, e.g. /about-us/). Leave blank to auto-discover via sitemap.'
         required: false
         default: |
           /
@@ -50,12 +50,25 @@ jobs:
             npx playwright install chromium --with-deps
           fi
 
+      - name: Write page cache from input
+        if: ${{ inputs.pages != '' }}
+        run: |
+          mkdir -p test-data
+          node -e "
+            const pages = \`${{ inputs.pages }}\`
+              .split('\n')
+              .map(l => l.trim())
+              .filter(l => l.startsWith('/'));
+            require('fs').writeFileSync('test-data/.page-cache.json', JSON.stringify(pages));
+            console.log('Pages cached:', pages);
+          "
+
       - name: Run tests
         run: npx playwright test
         env:
           BASE_URL: ${{ inputs.base_url || 'https://supercorals.hostweblankan.in' }}
-          PAGES: ${{ inputs.pages }}
           FULL_MATRIX: ${{ inputs.full_matrix || 'false' }}
+          SKIP_PAGE_DISCOVERY: ${{ inputs.pages != '' && 'true' || 'false' }}
 
       - uses: actions/upload-artifact@v4
         if: always()

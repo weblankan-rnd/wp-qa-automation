@@ -27,7 +27,7 @@ function parsePagesEnv(raw: string): string[] {
     .map(l => l.trim())
     .filter(l => l.length > 0 && l.startsWith('/'))
     .filter(l => !isExcluded(l))
-    .filter((l, i, arr) => arr.indexOf(l) === i); // dedupe
+    .filter((l, i, arr) => arr.indexOf(l) === i);
 }
 
 async function crawlLinks(baseUrl: string, maxPages = 25): Promise<string[]> {
