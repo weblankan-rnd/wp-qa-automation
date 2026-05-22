@@ -16,18 +16,9 @@ on:
         required: false
         default: 'https://supercorals.hostweblankan.in'
       pages:
-        description: 'Pages to test (one per line, e.g. /about-us/). Leave blank to auto-discover via sitemap.'
+        description: 'Pages to test — comma separated (e.g. /,/about-us/,/contact-us/). Leave blank to use defaults.'
         required: false
-        default: |
-          /
-          /about-us/
-          /accommodation/
-          /excursions/
-          /restaurant-and-bar/
-          /special-offers/
-          /gallery/
-          /contact-us/
-
+        default: '/,/about-us/,/accommodation/,/excursions/,/restaurant-and-bar/,/special-offers/,/gallery/,/contact-us/'
 
 jobs:
   smoke-test:
@@ -51,16 +42,13 @@ jobs:
           fi
 
       - name: Write page cache from input
-        if: ${{ inputs.pages != '' }}
         run: |
           mkdir -p test-data
           node -e "
-            const pages = \`${{ inputs.pages }}\`
-              .split('\n')
-              .map(l => l.trim())
-              .filter(l => l.startsWith('/'));
+            const raw = '${{ inputs.pages }}';
+            const pages = raw.split(',').map(p => p.trim()).filter(p => p.startsWith('/'));
             require('fs').writeFileSync('test-data/.page-cache.json', JSON.stringify(pages));
-            console.log('Pages cached:', pages);
+            console.log('Pages to test (' + pages.length + '):', pages.join(', '));
           "
 
       - name: Run tests
@@ -68,7 +56,7 @@ jobs:
         env:
           BASE_URL: ${{ inputs.base_url || 'https://supercorals.hostweblankan.in' }}
           FULL_MATRIX: ${{ inputs.full_matrix || 'false' }}
-          SKIP_PAGE_DISCOVERY: ${{ inputs.pages != '' && 'true' || 'false' }}
+          SKIP_PAGE_DISCOVERY: 'true'
 
       - uses: actions/upload-artifact@v4
         if: always()
