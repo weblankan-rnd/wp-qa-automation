@@ -14,20 +14,20 @@ const EXCLUDED_PATTERNS = [
 
 let cachedPages: string[] | null = null;
 
-function isInternalPath(path: string, baseHost: string, href: string): boolean {
-  try {
-    const u = new URL(href);
-    return u.hostname === baseHost;
-  } catch {
-    return href.startsWith('/') && !href.startsWith('//');
-  }
-}
-
 function isExcluded(path: string): boolean {
   return (
     EXCLUDED_PATTERNS.some(r => r.test(path)) ||
     IGNORED_PATHS.includes(path)
   );
+}
+
+function parsePagesEnv(raw: string): string[] {
+  return raw
+    .split('\n')
+    .map(l => l.trim())
+    .filter(l => l.length > 0 && l.startsWith('/'))
+    .filter(l => !isExcluded(l))
+    .filter((l, i, arr) => arr.indexOf(l) === i); // dedupe
 }
 
 async function crawlLinks(baseUrl: string, maxPages = 25): Promise<string[]> {
@@ -47,7 +47,6 @@ async function crawlLinks(baseUrl: string, maxPages = 25): Promise<string[]> {
       continue;
     }
 
-    // Extract all href values from anchor tags
     const hrefMatches = html.matchAll(/href=["']([^"'#?][^"']*?)["']/gi);
     for (const [, href] of hrefMatches) {
       let path: string;
@@ -60,14 +59,11 @@ async function crawlLinks(baseUrl: string, maxPages = 25): Promise<string[]> {
         path = href.split('?')[0].split('#')[0];
       }
 
-      // Normalize trailing slash
       if (!path.endsWith('/') && !path.includes('.')) path += '/';
-
       if (visited.has(path) || isExcluded(path) || path === '/') continue;
       visited.add(path);
 
       const fullUrl = `${baseUrl}${path}`;
-      // Verify reachable before adding
       try {
         const check = await fetch(fullUrl, { method: 'HEAD', signal: AbortSignal.timeout(8000), redirect: 'follow' });
         if (check.ok) {
@@ -146,12 +142,24 @@ export async function getPages(): Promise<string[]> {
   if (cachedPages) return cachedPages;
 
   const baseUrl = process.env.BASE_URL || '';
+
+  // If PAGES env var is set, use it directly — skip sitemap/crawl
+  const pagesEnv = process.env.PAGES || '';
+  if (pagesEnv.trim()) {
+    const parsed = parsePagesEnv(pagesEnv);
+    // Always ensure / is first
+    const pages = parsed.includes('/') ? parsed : ['/', ...parsed];
+    console.log(`[get-pages] Using PAGES from env (${pages.length} pages)`);
+    cachedPages = pages;
+    return cachedPages;
+  }
+
   if (!baseUrl) {
     cachedPages = ['/'];
     return cachedPages;
   }
 
-  // Try sitemap first; fall back to link crawling
+  // Auto-discover: try sitemap first, fall back to link crawling
   let paths = await discoverViaSitemap(baseUrl);
 
   if (!paths) {

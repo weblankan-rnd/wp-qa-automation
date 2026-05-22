@@ -15,6 +15,19 @@ on:
         description: 'Target URL (leave blank for default)'
         required: false
         default: 'https://supercorals.hostweblankan.in'
+      pages:
+        description: 'Pages to test (one per line, e.g. / or /about-us/). Leave blank to auto-discover via sitemap.'
+        required: false
+        default: |
+          /
+          /about-us/
+          /accommodation/
+          /excursions/
+          /restaurant-and-bar/
+          /special-offers/
+          /gallery/
+          /contact-us/
+
 
 jobs:
   smoke-test:
@@ -40,7 +53,8 @@ jobs:
       - name: Run tests
         run: npx playwright test
         env:
-          BASE_URL: ${{ inputs.base_url || 'https://www.weblankan.lk' }}
+          BASE_URL: ${{ inputs.base_url || 'https://supercorals.hostweblankan.in' }}
+          PAGES: ${{ inputs.pages }}
           FULL_MATRIX: ${{ inputs.full_matrix || 'false' }}
 
       - uses: actions/upload-artifact@v4

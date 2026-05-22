@@ -15,7 +15,7 @@ async function globalSetup() {
 
   const pages = await getPages();
   writeFileSync('test-data/.page-cache.json', JSON.stringify(pages), 'utf-8');
-  console.log(`[global-setup] Discovered ${pages.length} page(s) from sitemap`);
+  console.log(`[global-setup] Pages to test (${pages.length}): ${pages.join(', ')}`);
 }
 
 export default globalSetup;
