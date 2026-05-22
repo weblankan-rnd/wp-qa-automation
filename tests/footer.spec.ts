@@ -1,4 +1,4 @@
-import { test } from '@playwright/test';
+import { test, expect } from '@playwright/test';
 import { readFileSync, existsSync } from 'fs';
 import { IGNORED_PATHS } from '../test-utils/ignored-paths';
 
@@ -51,15 +51,15 @@ test.describe('Footer', () => {
 
   test('footer section is present @smoke', async ({ page }) => {
     const visible = await page.locator('footer').isVisible().catch(() => false);
-    if (!visible) console.error('[ISSUE][Footer] Footer element is not visible on homepage');
+    if (!visible) expect.soft(false, '[Footer] Footer element is not visible on homepage').toBeTruthy();
   });
 
   test('footer logo is visible @smoke', async ({ page }) => {
     const footerLogo = page.locator('footer .footerlogo img').first();
     const visible = await footerLogo.isVisible().catch(() => false);
-    if (!visible) { console.error('[ISSUE][Footer] Footer logo is not visible'); return; }
+    if (!visible) { expect.soft(false, '[Footer] Footer logo is not visible').toBeTruthy(); return; }
     const src = await footerLogo.getAttribute('src');
-    if (!src) console.error('[ISSUE][Footer] Footer logo has no src attribute');
+    if (!src) expect.soft(false, '[Footer] Footer logo has no src attribute').toBeTruthy();
   });
 
   test('clicking footer logo navigates to home page @smoke', async ({ page }) => {
@@ -73,9 +73,9 @@ test.describe('Footer', () => {
         footerLogo.click(),
       ]);
       const currentUrl = page.url().replace(/\/$/, '');
-      if (currentUrl !== BASE_URL) console.error(`[ISSUE][Footer] Footer logo navigated to "${currentUrl}", expected "${BASE_URL}"`);
+      if (currentUrl !== BASE_URL) expect.soft(false, `[Footer] Footer logo navigated to "${currentUrl}", expected "${BASE_URL}"`).toBeTruthy();
     } catch {
-      console.error('[ISSUE][Footer] Footer logo click did not navigate to home page');
+      expect.soft(false, '[Footer] Footer logo click did not navigate to home page').toBeTruthy();
     }
   });
 
@@ -93,9 +93,9 @@ test.describe('Footer', () => {
           footerLogo.click(),
         ]);
         const currentUrl = page.url().replace(/\/$/, '');
-        if (currentUrl !== BASE_URL) console.error(`[ISSUE][Footer] Logo on ${pagePath} navigated to "${currentUrl}", expected "${BASE_URL}"`);
+        if (currentUrl !== BASE_URL) expect.soft(false, `[Footer] Logo on ${pagePath} navigated to "${currentUrl}", expected "${BASE_URL}"`).toBeTruthy();
       } catch {
-        console.error(`[ISSUE][Footer] Footer logo click on ${pagePath} did not navigate to home`);
+        expect.soft(false, `[Footer] Footer logo click on ${pagePath} did not navigate to home`).toBeTruthy();
       }
     }
   });
@@ -103,14 +103,14 @@ test.describe('Footer', () => {
   test('footer navigation links are present and clickable @smoke', async ({ page }) => {
     const footerMenu = page.locator('footer .footer-menu ul li a');
     const count = await footerMenu.count();
-    if (count === 0) { console.error('[ISSUE][Footer] No footer navigation links found'); return; }
+    if (count === 0) { expect.soft(false, '[Footer] No footer navigation links found').toBeTruthy(); return; }
     for (let i = 0; i < count; i++) {
       const link = footerMenu.nth(i);
       await link.scrollIntoViewIfNeeded().catch(() => {});
       const visible = await link.isVisible().catch(() => false);
-      if (!visible) console.error(`[ISSUE][Footer] Footer nav link ${i} is not visible`);
+      if (!visible) expect.soft(false, `[Footer] Footer nav link ${i} is not visible`).toBeTruthy();
       const href = await link.getAttribute('href');
-      if (!href) console.error(`[ISSUE][Footer] Footer nav link ${i} has no href`);
+      if (!href) expect.soft(false, `[Footer] Footer nav link ${i} has no href`).toBeTruthy();
     }
   });
 
@@ -126,7 +126,7 @@ test.describe('Footer', () => {
       await page.waitForLoadState('domcontentloaded');
       const expectedPath = new URL(href).pathname.replace(/\/$/, '') || '/';
       if (!page.url().includes(expectedPath)) {
-        console.error(`[ISSUE][Footer] Footer link "${text}" navigated to "${page.url()}", expected path "${expectedPath}"`);
+        expect.soft(false, `[Footer] Footer link "${text}" navigated to "${page.url()}", expected path "${expectedPath}"`).toBeTruthy();
       }
       await page.goto('/', { waitUntil: 'domcontentloaded' });
     }
@@ -134,26 +134,26 @@ test.describe('Footer', () => {
 
   test('copyright section is present @smoke', async ({ page }) => {
     const copyright = page.locator('footer .copyright').first();
-    if (await copyright.count() === 0) { console.error('[ISSUE][Footer] No copyright section found'); return; }
+    if (await copyright.count() === 0) { expect.soft(false, '[Footer] No copyright section found').toBeTruthy(); return; }
     await copyright.scrollIntoViewIfNeeded().catch(() => {});
     const visible = await copyright.isVisible().catch(() => false);
-    if (!visible) { console.error('[ISSUE][Footer] Copyright section is not visible'); return; }
+    if (!visible) { expect.soft(false, '[Footer] Copyright section is not visible').toBeTruthy(); return; }
     const text = (await copyright.textContent()) || '';
-    if (!text.trim()) console.error('[ISSUE][Footer] Copyright section has no text content');
-    if (!/\d{4}/.test(text)) console.error('[ISSUE][Footer] Copyright section does not contain a year');
+    if (!text.trim()) expect.soft(false, '[Footer] Copyright section has no text content').toBeTruthy();
+    if (!/\d{4}/.test(text)) expect.soft(false, '[Footer] Copyright section does not contain a year').toBeTruthy();
   });
 
   test('social media links are present @smoke', async ({ page }) => {
     const socialLinks = page.locator('footer .social-links a');
     const count = await socialLinks.count();
-    if (count === 0) { console.error('[ISSUE][Footer] No social media links found in footer'); return; }
+    if (count === 0) { expect.soft(false, '[Footer] No social media links found in footer').toBeTruthy(); return; }
     const hrefs: string[] = [];
     for (let i = 0; i < count; i++) {
       const href = await socialLinks.nth(i).getAttribute('href');
       if (href) hrefs.push(href);
     }
-    if (!hrefs.some(h => h.includes('instagram.com'))) console.error('[ISSUE][Footer] No Instagram link found in footer');
-    if (!hrefs.some(h => h.includes('linkedin.com'))) console.error('[ISSUE][Footer] No LinkedIn link found in footer');
+    if (!hrefs.some(h => h.includes('instagram.com'))) expect.soft(false, '[Footer] No Instagram link found in footer').toBeTruthy();
+    if (!hrefs.some(h => h.includes('linkedin.com'))) expect.soft(false, '[Footer] No LinkedIn link found in footer').toBeTruthy();
   });
 
   test('social media links open in a new tab @smoke', async ({ page }) => {
@@ -162,9 +162,9 @@ test.describe('Footer', () => {
     for (let i = 0; i < count; i++) {
       const href = await socialLinks.nth(i).getAttribute('href');
       const target = await socialLinks.nth(i).getAttribute('target');
-      if (target !== '_blank') console.error(`[ISSUE][Footer] Social link "${href}" is missing target="_blank"`);
+      if (target !== '_blank') expect.soft(false, `[Footer] Social link "${href}" is missing target="_blank"`).toBeTruthy();
       const rel = await socialLinks.nth(i).getAttribute('rel');
-      if (!rel?.includes('noopener')) console.error(`[ISSUE][Footer] Social link "${href}" is missing rel="noopener"`);
+      if (!rel?.includes('noopener')) expect.soft(false, `[Footer] Social link "${href}" is missing rel="noopener"`).toBeTruthy();
     }
   });
 
@@ -172,9 +172,9 @@ test.describe('Footer', () => {
     const webLankanLink = page.locator('footer a[href*="weblankan.com"]');
     if (await webLankanLink.count() === 0) { console.warn('[Footer] Web Lankan link not found in footer'); return; }
     const target = await webLankanLink.getAttribute('target');
-    if (target !== '_blank') console.error('[ISSUE][Footer] Web Lankan link is missing target="_blank"');
+    if (target !== '_blank') expect.soft(false, '[Footer] Web Lankan link is missing target="_blank"').toBeTruthy();
     const rel = await webLankanLink.getAttribute('rel');
-    if (!rel?.includes('noopener')) console.error('[ISSUE][Footer] Web Lankan link is missing rel="noopener"');
+    if (!rel?.includes('noopener')) expect.soft(false, '[Footer] Web Lankan link is missing rel="noopener"').toBeTruthy();
   });
 
   test('all external footer links open in a new tab @smoke', async ({ page }) => {
@@ -184,7 +184,7 @@ test.describe('Footer', () => {
       const href = await allFooterLinks.nth(i).getAttribute('href');
       if (!href || href.includes('gammaaextracts.com')) continue;
       const target = await allFooterLinks.nth(i).getAttribute('target');
-      if (target !== '_blank') console.error(`[ISSUE][Footer] External link "${href}" is missing target="_blank"`);
+      if (target !== '_blank') expect.soft(false, `[Footer] External link "${href}" is missing target="_blank"`).toBeTruthy();
     }
   });
 
@@ -198,7 +198,7 @@ test.describe('Footer', () => {
     const capsSentenceStart = textContent.match(/\.\s+[a-z]/g);
     if (capsSentenceStart?.length) errors.push(`${capsSentenceStart.length} sentence(s) may not start with uppercase`);
     if (errors.length > 0) {
-      console.error(`[ISSUE][Footer] Spelling/text issues in footer:\n${errors.map(e => `  - ${e}`).join('\n')}`);
+      expect.soft(false, `[Footer] Spelling/text issues in footer:\n${errors.map(e => `  - ${e}`).join('\n')}`).toBeTruthy();
     }
   });
 
@@ -206,10 +206,10 @@ test.describe('Footer', () => {
     for (const pagePath of pagesToCheck.slice(0, 5)) {
       await page.goto(pagePath, { waitUntil: 'domcontentloaded' });
       const footer = page.locator('footer');
-      if (await footer.count() === 0) { console.error(`[ISSUE][Footer] No footer element on ${pagePath}`); continue; }
+      if (await footer.count() === 0) { expect.soft(false, `[Footer] No footer element on ${pagePath}`).toBeTruthy(); continue; }
       await footer.scrollIntoViewIfNeeded().catch(() => {});
       const visible = await footer.isVisible().catch(() => false);
-      if (!visible) console.error(`[ISSUE][Footer] Footer is not visible on ${pagePath}`);
+      if (!visible) expect.soft(false, `[Footer] Footer is not visible on ${pagePath}`).toBeTruthy();
     }
   });
 
@@ -217,10 +217,10 @@ test.describe('Footer', () => {
     const phoneLink = page.locator('footer a[href^="tel:"]');
     if (await phoneLink.count() === 0) { console.warn('[Footer] No phone link found in footer'); return; }
     const href = await phoneLink.first().getAttribute('href');
-    if (!href || !/^tel:\+?[\d\s]+$/.test(href)) console.error(`[ISSUE][Footer] Phone href format invalid: "${href}"`);
+    if (!href || !/^tel:\+?[\d\s]+$/.test(href)) expect.soft(false, `[Footer] Phone href format invalid: "${href}"`).toBeTruthy();
     const phoneText = (await phoneLink.first().textContent()) || '';
     if (!/^\+94\s?\d{2}\s?\d{3}\s?\d{4}$/.test(phoneText.trim())) {
-      console.error(`[ISSUE][Footer] Phone number format invalid: "${phoneText.trim()}" (expected: +94 XX XXX XXXX)`);
+      expect.soft(false, `[Footer] Phone number format invalid: "${phoneText.trim()}" (expected: +94 XX XXX XXXX)`).toBeTruthy();
     }
   });
 
@@ -228,10 +228,10 @@ test.describe('Footer', () => {
     const emailLink = page.locator('footer a[href^="mailto:"]');
     if (await emailLink.count() === 0) { console.warn('[Footer] No email link found in footer'); return; }
     const href = await emailLink.first().getAttribute('href');
-    if (!href || !/^mailto:/.test(href)) { console.error(`[ISSUE][Footer] Email href missing mailto: protocol: "${href}"`); return; }
+    if (!href || !/^mailto:/.test(href)) { expect.soft(false, `[Footer] Email href missing mailto: protocol: "${href}"`).toBeTruthy(); return; }
     const email = href.replace('mailto:', '');
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-      console.error(`[ISSUE][Footer] Email format invalid: "${email}"`);
+      expect.soft(false, `[Footer] Email format invalid: "${email}"`).toBeTruthy();
     }
   });
 });

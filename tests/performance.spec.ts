@@ -1,4 +1,4 @@
-import { test } from '@playwright/test';
+import { test, expect } from '@playwright/test';
 import { readFileSync, existsSync } from 'fs';
 import { IGNORED_PATHS } from '../test-utils/ignored-paths';
 
@@ -21,7 +21,7 @@ test.describe('Performance', () => {
       });
 
       if (loadMs > PAGE_LOAD_LIMIT_MS) {
-        console.error(`[ISSUE][Perf] ${pagePath} loaded in ${loadMs.toFixed(0)}ms (limit: ${PAGE_LOAD_LIMIT_MS}ms) — optimize page speed`);
+        expect.soft(false, `[Perf] ${pagePath} loaded in ${loadMs.toFixed(0)}ms (limit: ${PAGE_LOAD_LIMIT_MS}ms) — optimize page speed`).toBeTruthy();
       }
     });
   }
@@ -43,7 +43,7 @@ test.describe('Performance', () => {
     );
 
     if (lcpMs !== null && lcpMs > LCP_LIMIT_MS) {
-      console.error(`[ISSUE][Perf] LCP is ${lcpMs.toFixed(0)}ms on homepage (limit: ${LCP_LIMIT_MS}ms) — optimize largest content element`);
+      expect.soft(false, `[Perf] LCP is ${lcpMs.toFixed(0)}ms on homepage (limit: ${LCP_LIMIT_MS}ms) — optimize largest content element`).toBeTruthy();
     }
   });
 
@@ -68,10 +68,10 @@ test.describe('Performance', () => {
 
     const MAX_RENDER_BLOCKING = Number(process.env.MAX_RENDER_BLOCKING) || 8;
     if (renderBlocking.length > MAX_RENDER_BLOCKING) {
-      console.error(
-        `[ISSUE][Perf] ${renderBlocking.length} render-blocking resources (limit: ${MAX_RENDER_BLOCKING}) — add async/defer or inline critical CSS:\n` +
+      expect.soft(false,
+        `[Perf] ${renderBlocking.length} render-blocking resources (limit: ${MAX_RENDER_BLOCKING}) — add async/defer or inline critical CSS:\n` +
         renderBlocking.map(r => `  - ${r.type}: ${r.url}`).join('\n')
-      );
+      ).toBeTruthy();
     }
   });
 });

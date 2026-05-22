@@ -1,4 +1,4 @@
-import { test } from '@playwright/test';
+import { test, expect } from '@playwright/test';
 import { readFileSync, existsSync } from 'fs';
 import { IGNORED_PATHS } from '../test-utils/ignored-paths';
 
@@ -16,9 +16,9 @@ test.describe('Header', () => {
   test('logo is visible in the header @smoke', async ({ page }) => {
     const headerLogo = page.locator('header .navbar-brand img.main-logo').first();
     const visible = await headerLogo.isVisible().catch(() => false);
-    if (!visible) { console.error('[ISSUE][Header] Header logo is not visible on homepage'); return; }
+    if (!visible) { expect.soft(false, '[Header] Header logo is not visible on homepage').toBeTruthy(); return; }
     const src = await headerLogo.getAttribute('src');
-    if (!src) console.error('[ISSUE][Header] Header logo has no src attribute');
+    if (!src) expect.soft(false, '[Header] Header logo has no src attribute').toBeTruthy();
   });
 
   test('clicking header logo navigates to home page @smoke', async ({ page }) => {
@@ -29,16 +29,16 @@ test.describe('Header', () => {
     await headerLogo.click();
     await page.waitForLoadState('domcontentloaded');
     const currentUrl = page.url().replace(/\/$/, '');
-    if (currentUrl !== BASE_URL) console.error(`[ISSUE][Header] Logo click navigated to "${currentUrl}", expected "${BASE_URL}"`);
+    if (currentUrl !== BASE_URL) expect.soft(false, `[Header] Logo click navigated to "${currentUrl}", expected "${BASE_URL}"`).toBeTruthy();
   });
 
   test('hamburger menu is present on mobile viewport @smoke', async ({ page }) => {
     await page.setViewportSize({ width: 375, height: 812 });
     await page.goto('/', { waitUntil: 'domcontentloaded' });
     const visible = await page.locator('.hamburger-menu').isVisible().catch(() => false);
-    if (!visible) console.error('[ISSUE][Header] Hamburger menu not visible on mobile viewport');
+    if (!visible) expect.soft(false, '[Header] Hamburger menu not visible on mobile viewport').toBeTruthy();
     const logoCount = await page.locator('.hamburger-menu .navbar-brand img').count();
-    if (logoCount === 0) console.error('[ISSUE][Header] No logo found inside hamburger menu');
+    if (logoCount === 0) expect.soft(false, '[Header] No logo found inside hamburger menu').toBeTruthy();
   });
 
   test('mobile menu opens on hamburger click @smoke', async ({ page }) => {
@@ -46,10 +46,10 @@ test.describe('Header', () => {
     await page.goto('/', { waitUntil: 'domcontentloaded' });
     const menuHam = page.locator('.menu-ham');
     const visible = await menuHam.isVisible().catch(() => false);
-    if (!visible) { console.error('[ISSUE][Header] Hamburger button not visible on mobile'); return; }
+    if (!visible) { expect.soft(false, '[Header] Hamburger button not visible on mobile').toBeTruthy(); return; }
     await menuHam.click();
     const menuVisible = await page.locator('.mobile-menu').isVisible().catch(() => false);
-    if (!menuVisible) console.error('[ISSUE][Header] Mobile menu did not open after hamburger click');
+    if (!menuVisible) expect.soft(false, '[Header] Mobile menu did not open after hamburger click').toBeTruthy();
   });
 
   test('mobile menu logo navigates to home page @smoke', async ({ page }) => {
@@ -59,11 +59,11 @@ test.describe('Header', () => {
     if (!(await menuHam.isVisible().catch(() => false))) { console.warn('[Header] Hamburger not visible on /contact-us/'); return; }
     await menuHam.click();
     const mobileLogo = page.locator('.hamburger-menu .navbar-brand');
-    if (!(await mobileLogo.isVisible().catch(() => false))) { console.error('[ISSUE][Header] Mobile logo not visible after opening menu'); return; }
+    if (!(await mobileLogo.isVisible().catch(() => false))) { expect.soft(false, '[Header] Mobile logo not visible after opening menu').toBeTruthy(); return; }
     await mobileLogo.click();
     await page.waitForLoadState('domcontentloaded');
     const currentUrl = page.url().replace(/\/$/, '');
-    if (currentUrl !== BASE_URL) console.error(`[ISSUE][Header] Mobile logo navigated to "${currentUrl}", expected "${BASE_URL}"`);
+    if (currentUrl !== BASE_URL) expect.soft(false, `[Header] Mobile logo navigated to "${currentUrl}", expected "${BASE_URL}"`).toBeTruthy();
   });
 
   for (const pagePath of pagesToCheck.slice(0, 5)) {
@@ -74,14 +74,14 @@ test.describe('Header', () => {
       const desktopActive = await activeLink.isVisible().catch(() => false);
       if (desktopActive) {
         const text = await activeLink.textContent();
-        if (!text?.trim()) console.error(`[ISSUE][Header] Active menu link has no visible text on ${pagePath}`);
+        if (!text?.trim()) expect.soft(false, `[Header] Active menu link has no visible text on ${pagePath}`).toBeTruthy();
       }
       const menuHamVisible = await page.locator('.menu-ham').isVisible().catch(() => false);
       if (menuHamVisible) {
         await page.locator('.menu-ham').click();
         await page.locator('.mobile-menu').waitFor({ state: 'visible', timeout: 3000 }).catch(() => {});
         const mobileActiveExists = await page.locator('.mobile-menu .current-menu-item a, .mobile-menu .current_page_item a').count();
-        if (mobileActiveExists === 0) console.error(`[ISSUE][Header] No active menu item in mobile menu on ${pagePath}`);
+        if (mobileActiveExists === 0) expect.soft(false, `[Header] No active menu item in mobile menu on ${pagePath}`).toBeTruthy();
       }
     });
   }
@@ -92,7 +92,7 @@ test.describe('Header', () => {
       const desktopLogoVisible = await page.locator('header .navbar-brand img.main-logo').first().isVisible().catch(() => false);
       const mobileLogoExists = await page.locator('.hamburger-menu .navbar-brand img').count();
       if (!desktopLogoVisible && mobileLogoExists === 0) {
-        console.error(`[ISSUE][Header] No logo found on ${pagePath} (checked desktop header and hamburger menu)`);
+        expect.soft(false, `[Header] No logo found on ${pagePath} (checked desktop header and hamburger menu)`).toBeTruthy();
       }
     }
   });
@@ -106,7 +106,7 @@ test.describe('Header', () => {
       await page.waitForLoadState('domcontentloaded');
       const currentUrl = page.url().replace(/\/$/, '');
       if (currentUrl !== BASE_URL) {
-        console.error(`[ISSUE][Header] Logo click on ${pagePath} navigated to "${currentUrl}", expected "${BASE_URL}"`);
+        expect.soft(false, `[Header] Logo click on ${pagePath} navigated to "${currentUrl}", expected "${BASE_URL}"`).toBeTruthy();
       }
     }
   });

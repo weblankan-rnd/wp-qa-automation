@@ -1,4 +1,4 @@
-import { test } from '@playwright/test';
+import { test, expect } from '@playwright/test';
 import { readFileSync, existsSync } from 'fs';
 import { IGNORED_PATHS } from '../test-utils/ignored-paths';
 
@@ -15,7 +15,7 @@ test.describe('Navigation', () => {
   test('desktop header nav links navigate to correct pages @smoke', async ({ page }) => {
     const navLinks = page.locator('header .navigation .left-menu ul li a, header .navigation .right-menu ul li a');
     const count = await navLinks.count();
-    if (count === 0) { console.error('[ISSUE][Nav] No desktop header nav links found'); return; }
+    if (count === 0) { expect.soft(false, '[Nav] No desktop header nav links found').toBeTruthy(); return; }
     for (let i = 0; i < count; i++) {
       const text = ((await navLinks.nth(i).textContent()) || '').trim();
       const href = await navLinks.nth(i).getAttribute('href');
@@ -26,7 +26,7 @@ test.describe('Navigation', () => {
       const expectedPath = new URL(href).pathname.replace(/\/$/, '') || '/';
       const currentPath = new URL(page.url()).pathname.replace(/\/$/, '') || '/';
       if (currentPath !== expectedPath) {
-        console.error(`[ISSUE][Nav] "${text}" navigated to "${currentPath}", expected "${expectedPath}"`);
+        expect.soft(false, `[Nav] "${text}" navigated to "${currentPath}", expected "${expectedPath}"`).toBeTruthy();
       }
       await page.goto('/', { waitUntil: 'domcontentloaded' });
     }
@@ -36,12 +36,12 @@ test.describe('Navigation', () => {
     await page.setViewportSize({ width: 375, height: 812 });
     await page.goto('/', { waitUntil: 'domcontentloaded' });
     const menuHam = page.locator('.menu-ham');
-    if (!(await menuHam.isVisible().catch(() => false))) { console.error('[ISSUE][Nav] Hamburger button not visible on mobile'); return; }
+    if (!(await menuHam.isVisible().catch(() => false))) { expect.soft(false, '[Nav] Hamburger button not visible on mobile').toBeTruthy(); return; }
     await menuHam.click();
     await page.locator('.mobile-menu').waitFor({ state: 'visible', timeout: 3000 }).catch(() => {});
     const mobileLinks = page.locator('.mobile-menu ul li a');
     const count = await mobileLinks.count();
-    if (count === 0) { console.error('[ISSUE][Nav] No mobile menu links found'); return; }
+    if (count === 0) { expect.soft(false, '[Nav] No mobile menu links found').toBeTruthy(); return; }
     for (let i = 0; i < count; i++) {
       const text = ((await mobileLinks.nth(i).textContent()) || '').trim();
       const href = await mobileLinks.nth(i).getAttribute('href');
@@ -51,7 +51,7 @@ test.describe('Navigation', () => {
       const expectedPath = new URL(href).pathname.replace(/\/$/, '') || '/';
       const currentPath = new URL(page.url()).pathname.replace(/\/$/, '') || '/';
       if (currentPath !== expectedPath) {
-        console.error(`[ISSUE][Nav] Mobile link "${text}" navigated to "${currentPath}", expected "${expectedPath}"`);
+        expect.soft(false, `[Nav] Mobile link "${text}" navigated to "${currentPath}", expected "${expectedPath}"`).toBeTruthy();
       }
       await page.goto('/', { waitUntil: 'domcontentloaded' });
       await menuHam.click();
@@ -73,7 +73,7 @@ test.describe('Navigation', () => {
       const expectedPath = new URL(href).pathname.replace(/\/$/, '') || '/';
       const currentPath = new URL(page.url()).pathname.replace(/\/$/, '') || '/';
       if (currentPath !== expectedPath) {
-        console.error(`[ISSUE][Nav] Banner link "${text}" navigated to "${currentPath}", expected "${expectedPath}"`);
+        expect.soft(false, `[Nav] Banner link "${text}" navigated to "${currentPath}", expected "${expectedPath}"`).toBeTruthy();
       }
       await page.goto('/', { waitUntil: 'domcontentloaded' });
     }
@@ -100,7 +100,7 @@ test.describe('Navigation', () => {
         }
       }, url);
       if (status === 0 || status >= 400) {
-        console.error(`[ISSUE][Nav] Header link returned ${status === 0 ? 'connection error' : status}: ${url}`);
+        expect.soft(false, `[Nav] Header link returned ${status === 0 ? 'connection error' : status}: ${url}`).toBeTruthy();
       }
     }
   });
@@ -115,7 +115,7 @@ test.describe('Navigation', () => {
         if (!href || href.includes('gammaaextracts.com')) continue;
         const target = await allLinks.nth(i).getAttribute('target');
         if (target !== '_blank') {
-          console.error(`[ISSUE][Nav] External link missing target="_blank" on ${pagePath}: ${href}`);
+          expect.soft(false, `[Nav] External link missing target="_blank" on ${pagePath}: ${href}`).toBeTruthy();
         }
       }
     }
@@ -133,7 +133,7 @@ test.describe('Navigation', () => {
       const activeItem = page.locator('header .navigation .current-menu-item, header .navigation .current_page_item').first();
       if (await activeItem.isVisible().catch(() => false)) {
         const activeText = (await activeItem.textContent()) || '';
-        if (!activeText.trim()) console.error(`[ISSUE][Nav] Active nav item has no text after navigating to ${href}`);
+        if (!activeText.trim()) expect.soft(false, `[Nav] Active nav item has no text after navigating to ${href}`).toBeTruthy();
       }
       await page.goto('/', { waitUntil: 'domcontentloaded' });
     }

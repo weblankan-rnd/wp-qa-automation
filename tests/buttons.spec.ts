@@ -1,4 +1,4 @@
-import { test } from '@playwright/test';
+import { test, expect } from '@playwright/test';
 import { readFileSync, existsSync } from 'fs';
 import { IGNORED_PATHS } from '../test-utils/ignored-paths';
 
@@ -16,10 +16,10 @@ test.describe('Buttons', () => {
   test('CTA buttons are visible on homepage @smoke', async ({ page }) => {
     const ctaButtons = page.locator('.button-wrap a.hvr-shutter-out-horizontal');
     const count = await ctaButtons.count();
-    if (count === 0) { console.error('[ISSUE][Buttons] No CTA buttons found on homepage'); return; }
+    if (count === 0) { expect.soft(false, '[Buttons] No CTA buttons found on homepage').toBeTruthy(); return; }
     for (let i = 0; i < count; i++) {
       const visible = await ctaButtons.nth(i).isVisible().catch(() => false);
-      if (!visible) console.error(`[ISSUE][Buttons] CTA button ${i} is not visible on homepage`);
+      if (!visible) expect.soft(false, `[Buttons] CTA button ${i} is not visible on homepage`).toBeTruthy();
     }
   });
 
@@ -28,9 +28,9 @@ test.describe('Buttons', () => {
     const count = await ctaButtons.count();
     for (let i = 0; i < count; i++) {
       const href = await ctaButtons.nth(i).getAttribute('href');
-      if (!href) { console.error(`[ISSUE][Buttons] CTA button ${i} has no href`); continue; }
+      if (!href) { expect.soft(false, `[Buttons] CTA button ${i} has no href`).toBeTruthy(); continue; }
       if (!href.startsWith('http') && !href.startsWith('/')) {
-        console.error(`[ISSUE][Buttons] CTA button ${i} href is not a valid URL: "${href}"`);
+        expect.soft(false, `[Buttons] CTA button ${i} href is not a valid URL: "${href}"`).toBeTruthy();
       }
     }
   });
@@ -49,10 +49,10 @@ test.describe('Buttons', () => {
         ]);
         const currentPath = new URL(page.url()).pathname.replace(/\/$/, '') || '/';
         if (currentPath !== expectedPath) {
-          console.error(`[ISSUE][Buttons] CTA button ${i} navigated to "${currentPath}", expected "${expectedPath}"`);
+          expect.soft(false, `[Buttons] CTA button ${i} navigated to "${currentPath}", expected "${expectedPath}"`).toBeTruthy();
         }
       } catch {
-        console.error(`[ISSUE][Buttons] CTA button ${i} click did not navigate to "${expectedPath}" within 10s`);
+        expect.soft(false, `[Buttons] CTA button ${i} click did not navigate to "${expectedPath}" within 10s`).toBeTruthy();
       }
       await page.goto('/', { waitUntil: 'domcontentloaded' });
     }
@@ -80,7 +80,7 @@ test.describe('Buttons', () => {
       }
     }
     if (misspelled.length > 0) {
-      console.error(`[ISSUE][Buttons] Spelling errors in CTA buttons:\n${misspelled.map(s => `  - ${s}`).join('\n')}`);
+      expect.soft(false, `[Buttons] Spelling errors in CTA buttons:\n${misspelled.map(s => `  - ${s}`).join('\n')}`).toBeTruthy();
     }
   });
 
@@ -92,8 +92,8 @@ test.describe('Buttons', () => {
       if (!visible) continue;
       const disabled = await allButtons.nth(i).getAttribute('disabled');
       const ariaDisabled = await allButtons.nth(i).getAttribute('aria-disabled');
-      if (disabled !== null) console.error(`[ISSUE][Buttons] Button ${i} has disabled attribute`);
-      if (ariaDisabled === 'true') console.error(`[ISSUE][Buttons] Button ${i} is aria-disabled`);
+      if (disabled !== null) expect.soft(false, `[Buttons] Button ${i} has disabled attribute`).toBeTruthy();
+      if (ariaDisabled === 'true') expect.soft(false, `[Buttons] Button ${i} is aria-disabled`).toBeTruthy();
     }
   });
 
@@ -115,7 +115,7 @@ test.describe('Buttons', () => {
       const text = await btn.evaluate(el => (el as HTMLElement).innerText ?? '').catch(() => '');
       const trimmed = text.replace(/\s+/g, ' ').trim();
       if (trimmed.length === 0) {
-        console.error(`[ISSUE][Buttons] Button ${i} has no visible text (add text or aria-label)`);
+        expect.soft(false, `[Buttons] Button ${i} has no visible text (add text or aria-label)`).toBeTruthy();
       }
     }
   });
@@ -127,7 +127,7 @@ test.describe('Buttons', () => {
     if (fileInputCount === 0) { console.warn('[Buttons] No file upload field found on contact page'); return; }
     const fileVisible = await fileInput.first().isVisible().catch(() => false);
     const parentVisible = fileVisible || await fileInput.first().locator('..').first().isVisible().catch(() => false);
-    if (!parentVisible) console.error('[ISSUE][Buttons] File upload input is not visible on contact page');
+    if (!parentVisible) expect.soft(false, '[Buttons] File upload input is not visible on contact page').toBeTruthy();
   });
 
   test('upload trigger element is clickable on contact page @smoke', async ({ page }) => {
@@ -141,7 +141,7 @@ test.describe('Buttons', () => {
       const tag = await uploadTrigger.nth(i).evaluate(el => el.tagName.toLowerCase());
       const disabled = await uploadTrigger.nth(i).getAttribute('disabled');
       if (tag === 'input' && disabled !== null) {
-        console.error(`[ISSUE][Buttons] Upload input ${i} is disabled on contact page`);
+        expect.soft(false, `[Buttons] Upload input ${i} is disabled on contact page`).toBeTruthy();
       }
     }
   });
@@ -154,7 +154,7 @@ test.describe('Buttons', () => {
       if (!visible) { console.warn(`[Buttons] Footer contact button not visible on ${pagePath}`); continue; }
       await contactBtn.scrollIntoViewIfNeeded();
       const disabled = await contactBtn.getAttribute('disabled');
-      if (disabled !== null) console.error(`[ISSUE][Buttons] Footer contact button is disabled on ${pagePath}`);
+      if (disabled !== null) expect.soft(false, `[Buttons] Footer contact button is disabled on ${pagePath}`).toBeTruthy();
     }
   });
 
@@ -168,7 +168,7 @@ test.describe('Buttons', () => {
       if (!href) continue;
       await buttons.nth(i).focus();
       const focused = await buttons.nth(i).evaluate(el => el === document.activeElement).catch(() => false);
-      if (!focused) console.error(`[ISSUE][Buttons] Button ${i} is not keyboard focusable`);
+      if (!focused) expect.soft(false, `[Buttons] Button ${i} is not keyboard focusable`).toBeTruthy();
     }
   });
 });

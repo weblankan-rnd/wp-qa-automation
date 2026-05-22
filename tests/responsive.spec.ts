@@ -1,4 +1,4 @@
-import { test } from '@playwright/test';
+import { test, expect } from '@playwright/test';
 import { readFileSync, existsSync } from 'fs';
 import { IGNORED_PATHS } from '../test-utils/ignored-paths';
 
@@ -23,9 +23,9 @@ test.describe('Responsive Design', () => {
     test(`has viewport meta tag on ${label} @smoke`, async ({ page }) => {
       await page.goto(pagePath, { waitUntil: 'domcontentloaded' });
       const viewport = await page.$eval('meta[name="viewport"]', el => el.getAttribute('content')).catch(() => null);
-      if (!viewport) { console.error(`[ISSUE][Responsive] Missing viewport meta tag on ${pagePath}`); return; }
+      if (!viewport) { expect.soft(false, `[Responsive] Missing viewport meta tag on ${pagePath}`).toBeTruthy(); return; }
       if (!viewport.toLowerCase().includes('width=device-width')) {
-        console.error(`[ISSUE][Responsive] Viewport meta missing width=device-width on ${pagePath}: "${viewport}"`);
+        expect.soft(false, `[Responsive] Viewport meta missing width=device-width on ${pagePath}: "${viewport}"`).toBeTruthy();
       }
     });
 
@@ -61,7 +61,7 @@ test.describe('Responsive Design', () => {
         }, vp.width);
 
         if (overflow.length > 0) {
-          console.error(`[ISSUE][Responsive] Horizontal overflow at ${vp.name} on ${pagePath}:\n${overflow.map(s => `  - ${s}`).join('\n')}`);
+          expect.soft(false, `[Responsive] Horizontal overflow at ${vp.name} on ${pagePath}:\n${overflow.map(s => `  - ${s}`).join('\n')}`).toBeTruthy();
         }
       });
     }
@@ -84,8 +84,11 @@ test.describe('Responsive Design', () => {
       }
       const hasNav = hamburgerVisible || visibleNavCount > 0;
       if (!hasNav) {
-        const level = isArchivePage(pagePath) ? console.warn : console.error;
-        level(`${isArchivePage(pagePath) ? '[Responsive]' : '[ISSUE][Responsive]'} No visible navigation found on mobile for ${pagePath}`);
+        if (isArchivePage(pagePath)) {
+          console.warn(`[Responsive] No visible navigation found on mobile for ${pagePath}`);
+        } else {
+          expect.soft(false, `[Responsive] No visible navigation found on mobile for ${pagePath}`).toBeTruthy();
+        }
       }
     });
 
@@ -112,7 +115,7 @@ test.describe('Responsive Design', () => {
       });
 
       if (tinyText.length > 0) {
-        console.error(`[ISSUE][Responsive] Text smaller than 12px on mobile (${pagePath}):\n${tinyText.map(s => `  - ${s}`).join('\n')}`);
+        expect.soft(false, `[Responsive] Text smaller than 12px on mobile (${pagePath}):\n${tinyText.map(s => `  - ${s}`).join('\n')}`).toBeTruthy();
       }
     });
   }
@@ -134,7 +137,7 @@ test.describe('Responsive Design', () => {
     });
 
     if (oversized.length > 0) {
-      console.error(`[ISSUE][Responsive] Images wider than viewport on mobile:\n${oversized.map(s => `  - ${s}`).join('\n')}`);
+      expect.soft(false, `[Responsive] Images wider than viewport on mobile:\n${oversized.map(s => `  - ${s}`).join('\n')}`).toBeTruthy();
     }
   });
 });

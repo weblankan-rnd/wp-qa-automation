@@ -1,4 +1,4 @@
-import { test } from '@playwright/test';
+import { test, expect } from '@playwright/test';
 import { readFileSync, existsSync } from 'fs';
 import { IGNORED_PATHS } from '../test-utils/ignored-paths';
 
@@ -27,7 +27,7 @@ test.describe('Images', () => {
       }
 
       if (nonWebp.length > 0) {
-        console.error(`[ISSUE][Images] Non-WebP images on ${pagePath} (convert to .webp):\n${nonWebp.map(s => `  - ${s}`).join('\n')}`);
+        expect.soft(false, `[Images] Non-WebP images on ${pagePath} (convert to .webp):\n${nonWebp.map(s => `  - ${s}`).join('\n')}`).toBeTruthy();
       }
     });
   }
@@ -55,7 +55,7 @@ test.describe('Images', () => {
     });
 
     if (bgImages.length > 0) {
-      console.error(`[ISSUE][Images] Non-WebP CSS background images on homepage (convert to .webp):\n${bgImages.map(s => `  - ${s}`).join('\n')}`);
+      expect.soft(false, `[Images] Non-WebP CSS background images on homepage (convert to .webp):\n${bgImages.map(s => `  - ${s}`).join('\n')}`).toBeTruthy();
     }
   });
 
@@ -92,7 +92,7 @@ test.describe('Images', () => {
     );
 
     if (oversized.length > 0) {
-      console.error(`[ISSUE][Images] ${oversized.length} image(s) exceed ${IMAGE_SIZE_LIMIT_KB}KB (compress in WordPress):\n${oversized.map(s => `  - ${s}`).join('\n')}`);
+      expect.soft(false, `[Images] ${oversized.length} image(s) exceed ${IMAGE_SIZE_LIMIT_KB}KB (compress in WordPress):\n${oversized.map(s => `  - ${s}`).join('\n')}`).toBeTruthy();
     }
   });
 });
