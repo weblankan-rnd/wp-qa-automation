@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(node -e \"require\\('dotenv'\\).config\\(\\); console.log\\(JSON.stringify\\(process.env.PAGES\\)\\)\")",
+      "Bash(node -e ' *)"
+    ]
+  }
+}
