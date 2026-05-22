@@ -3,10 +3,7 @@ import dotenv from 'dotenv';
 
 dotenv.config();
 
-const isLive = process.env.ENVIRONMENT === 'live';
 const fullMatrix = process.env.FULL_MATRIX === 'true';
-
-const ignoredSpecs = isLive ? ['**/registration.spec.ts', '**/forms.spec.ts', '**/login.spec.ts'] : [];
 
 export default defineConfig({
   globalSetup: './global-setup.ts',
@@ -36,29 +33,24 @@ export default defineConfig({
     {
       name: 'Desktop Chrome',
       use: { ...devices['Desktop Chrome'] },
-      testIgnore: ignoredSpecs,
     },
     ...(fullMatrix ? [
       {
         name: 'Desktop Firefox',
         use: { ...devices['Desktop Firefox'] },
-        testIgnore: ignoredSpecs,
-      },
+        },
       {
         name: 'Desktop Safari',
         use: { ...devices['Desktop Safari'] },
-        testIgnore: ignoredSpecs,
-      },
+        },
       {
         name: 'Mobile Chrome',
         use: { ...devices['Pixel 5'] },
-        testIgnore: ignoredSpecs,
-      },
+        },
       {
         name: 'Mobile Safari',
         use: { ...devices['iPhone 13'] },
-        testIgnore: ignoredSpecs,
-      },
+        },
     ] : []),
   ],
   outputDir: 'reports/test-results',
