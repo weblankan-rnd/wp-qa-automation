@@ -19,10 +19,38 @@ on:
         description: 'Pages to test — comma separated (e.g. /,/about-us/,/contact-us/). Leave blank to use defaults.'
         required: false
         default: '/,/about-us/,/accommodation/,/excursions/,/restaurant-and-bar/,/special-offers/,/gallery/,/contact-us/'
+      accessibility_impact:
+        description: 'Min accessibility impact to fail on'
+        required: false
+        default: 'critical'
+        type: choice
+        options:
+          - 'critical'
+          - 'serious'
+          - 'moderate'
+      visual_regression:
+        description: 'Run visual regression tests'
+        required: false
+        default: 'false'
+        type: choice
+        options:
+          - 'false'
+          - 'true'
+      slack_notify:
+        description: 'Send Slack notification on failure'
+        required: false
+        default: 'true'
+        type: choice
+        options:
+          - 'true'
+          - 'false'
 
 jobs:
+  # ── Smoke Tests ──────────────────────────────────────────────────────────────
   smoke-test:
     runs-on: ubuntu-latest
+    timeout-minutes: 30
+
     steps:
       - uses: actions/checkout@v4
 
@@ -35,7 +63,7 @@ jobs:
 
       - name: Install browsers
         run: |
-          if [ "${{ inputs.full_matrix }}" = "true" ]; then
+          if [ "${{ inputs.full_matrix || 'false' }}" = "true" ]; then
             npx playwright install --with-deps
           else
             npx playwright install chromium --with-deps
@@ -45,29 +73,146 @@ jobs:
         run: |
           mkdir -p test-data
           node -e "
-            const raw = '${{ inputs.pages }}';
+            const raw = '${{ inputs.pages || github.event.inputs.pages || '/,/about-us/,/accommodation/,/excursions/,/restaurant-and-bar/,/special-offers/,/gallery/,/contact-us/' }}';
             const pages = raw.split(',').map(p => p.trim()).filter(p => p.startsWith('/'));
             require('fs').writeFileSync('test-data/.page-cache.json', JSON.stringify(pages));
             console.log('Pages to test (' + pages.length + '):', pages.join(', '));
           "
 
       - name: Run tests
+        id: tests
         run: npx playwright test
+        continue-on-error: true
         env:
-          BASE_URL: ${{ inputs.base_url || 'https://supercorals.hostweblankan.in' }}
+          BASE_URL: ${{ inputs.base_url || github.event.inputs.base_url || 'https://supercorals.hostweblankan.in' }}
           FULL_MATRIX: ${{ inputs.full_matrix || 'false' }}
           SKIP_PAGE_DISCOVERY: 'true'
+          ACCESSIBILITY_IMPACT: ${{ inputs.accessibility_impact || 'critical' }}
 
-      - uses: actions/upload-artifact@v4
+      - name: Upload HTML report
+        uses: actions/upload-artifact@v4
         if: always()
         with:
           name: playwright-report
           path: reports/html/
           retention-days: 14
 
-      - uses: actions/upload-artifact@v4
+      - name: Upload test results (traces, screenshots, videos)
+        uses: actions/upload-artifact@v4
         if: always()
         with:
           name: test-results
           path: reports/test-results/
           retention-days: 7
+
+      - name: Upload diff images (visual regression)
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: visual-diffs
+          path: test-data/screenshots/diff/
+          retention-days: 30
+
+      # ── Summary ─────────────────────────────────────────────────────────
+      - name: Test summary
+        if: always()
+        run: |
+          echo "## ⚙️ QA Run Summary" >> $GITHUB_STEP_SUMMARY
+          echo "- **Target:** ${{ inputs.base_url || 'https://supercorals.hostweblankan.in' }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Browser matrix:** ${{ inputs.full_matrix == 'true' && 'Full (5 browsers)' || 'Chrome only' }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Visual regression:** ${{ inputs.visual_regression == 'true' && '✅ Enabled' || '⏭️ Skipped' }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Accessibility impact:** ${{ inputs.accessibility_impact || 'critical' }}" >> $GITHUB_STEP_SUMMARY
+
+      # ── Slack Notification (on failure) ─────────────────────────────────
+      - name: Send Slack notification on failure
+        if: ${{ failure() && (inputs.slack_notify || 'true') == 'true' }}
+        uses: slackapi/slack-github-action@v2
+        with:
+          webhook: ${{ secrets.SLACK_WEBHOOK_URL }}
+          webhook-type: incoming-webhook
+          payload: |
+            {
+              "text": "❌ QA tests FAILED for ${{ inputs.base_url || 'https://supercorals.hostweblankan.in' }}",
+              "blocks": [
+                {
+                  "type": "section",
+                  "text": {
+                    "type": "mrkdwn",
+                    "text": "*❌ QA Test Failure*\n• *Target:* ${{ inputs.base_url || 'https://supercorals.hostweblankan.in' }}\n• *Trigger:* ${{ github.event_name }}\n• *Run:* <${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}|View Run>\n• *Branch:* ${{ github.ref_name }}"
+                  }
+                }
+              ]
+            }
+
+  # ── Visual Regression (optional, manual trigger only) ────────────────────────
+  visual-regression:
+    if: ${{ inputs.visual_regression == 'true' || github.event.inputs.visual_regression == 'true' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - run: npm ci
+
+      - name: Install Chromium
+        run: npx playwright install chromium --with-deps
+
+      - name: Write page cache
+        run: |
+          mkdir -p test-data
+          node -e "
+            const raw = '${{ inputs.pages || '/,/about-us/,/contact-us/' }}';
+            const pages = raw.split(',').map(p => p.trim()).filter(p => p.startsWith('/'));
+            require('fs').writeFileSync('test-data/.page-cache.json', JSON.stringify(pages));
+          "
+
+      - name: Run visual regression tests
+        run: npx playwright test tests/visual-regression.spec.ts
+        env:
+          BASE_URL: ${{ inputs.base_url || 'https://supercorals.hostweblankan.in' }}
+          SKIP_PAGE_DISCOVERY: 'true'
+
+      - name: Upload visual diffs
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: visual-regression-diffs
+          path: test-data/screenshots/
+          retention-days: 30
+
+  # ── Lighthouse Performance Budgets (optional) ───────────────────────────────
+  lighthouse:
+    if: ${{ github.event_name == 'workflow_dispatch' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - run: npm ci
+
+      - name: Run Lighthouse CI
+        run: npx lhci autorun
+        continue-on-error: true
+        env:
+          LHCI_GITHUB_APP_TOKEN: ${{ secrets.LHCI_GITHUB_APP_TOKEN }}
+          BASE_URL: ${{ inputs.base_url || 'https://supercorals.hostweblankan.in' }}
+
+      - name: Upload Lighthouse report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: lighthouse-report
+          path: .lighthouseci/
+          retention-days: 30

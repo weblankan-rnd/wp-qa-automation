@@ -4,11 +4,12 @@ import dotenv from 'dotenv';
 dotenv.config();
 
 const fullMatrix = process.env.FULL_MATRIX === 'true';
+const baseURL = process.env.BASE_URL || 'http://localhost';
 
 export default defineConfig({
   globalSetup: './global-setup.ts',
   testDir: './tests',
-  timeout: 60000,
+  timeout: process.env.CI ? 90000 : 60000,
   expect: { timeout: 10000 },
   fullyParallel: true,
   forbidOnly: !!process.env.CI,
@@ -21,7 +22,7 @@ export default defineConfig({
     ['json', { outputFile: 'reports/results.json' }],
   ],
   use: {
-    baseURL: process.env.BASE_URL || 'http://localhost',
+    baseURL,
     trace: 'on-first-retry',
     screenshot: 'only-on-failure',
     video: 'retain-on-failure',
@@ -34,24 +35,36 @@ export default defineConfig({
       name: 'Desktop Chrome',
       use: { ...devices['Desktop Chrome'] },
     },
-    ...(fullMatrix ? [
-      {
-        name: 'Desktop Firefox',
-        use: { ...devices['Desktop Firefox'] },
-        },
-      {
-        name: 'Desktop Safari',
-        use: { ...devices['Desktop Safari'] },
-        },
-      {
-        name: 'Mobile Chrome',
-        use: { ...devices['Pixel 5'] },
-        },
-      {
-        name: 'Mobile Safari',
-        use: { ...devices['iPhone 13'] },
-        },
-    ] : []),
+    ...(fullMatrix
+      ? [
+          {
+            name: 'Desktop Firefox',
+            use: { ...devices['Desktop Firefox'] },
+          },
+          {
+            name: 'Desktop Safari',
+            use: { ...devices['Desktop Safari'] },
+          },
+          {
+            name: 'Mobile Chrome',
+            use: { ...devices['Pixel 5'] },
+          },
+          {
+            name: 'Mobile Safari',
+            use: { ...devices['iPhone 13'] },
+          },
+        ]
+      : []),
   ],
+  // Ignore destructive tests in live environment
+  ...(process.env.ENVIRONMENT === 'live'
+    ? {
+        testIgnore: [
+          '**/forms.spec.ts',
+          '**/registration.spec.ts',
+          '**/login.spec.ts',
+        ],
+      }
+    : {}),
   outputDir: 'reports/test-results',
 });

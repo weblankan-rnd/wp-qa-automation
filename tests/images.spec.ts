@@ -1,17 +1,14 @@
 import { test, expect } from '@playwright/test';
-import { readFileSync, existsSync } from 'fs';
-import { IGNORED_PATHS } from '../test-utils/ignored-paths';
+import { config } from '../test-utils/config';
+import { getPagesToCheck, pageLabel } from '../test-utils/get-pages-to-check';
 
-const cachePath = 'test-data/.page-cache.json';
-const pagesToCheck: string[] = (existsSync(cachePath)
-  ? JSON.parse(readFileSync(cachePath, 'utf-8'))
-  : ['/']).filter((p: string) => !IGNORED_PATHS.includes(p));
-
-const IMAGE_SIZE_LIMIT_KB = Number(process.env.IMAGE_SIZE_LIMIT_KB) || 500;
+const pagesToCheck = getPagesToCheck();
 
 test.describe('Images', () => {
   for (const pagePath of pagesToCheck) {
-    test(`all images are .webp format on ${pagePath === '/' ? 'homepage' : pagePath} @smoke`, async ({ page }) => {
+    const label = pageLabel(pagePath);
+
+    test(`all images are .webp format on ${label} @smoke`, async ({ page }) => {
       await page.goto(pagePath, { waitUntil: 'load' });
 
       const images = page.locator('img[src]');
@@ -27,7 +24,10 @@ test.describe('Images', () => {
       }
 
       if (nonWebp.length > 0) {
-        expect.soft(false, `[Images] Non-WebP images on ${pagePath} (convert to .webp):\n${nonWebp.map(s => `  - ${s}`).join('\n')}`).toBeTruthy();
+        expect.soft(
+          false,
+          `[Images] Non-WebP images on ${pagePath} (convert to .webp):\n${nonWebp.map((s) => `  - ${s}`).join('\n')}`
+        ).toBeTruthy();
       }
     });
   }
@@ -43,7 +43,7 @@ test.describe('Images', () => {
       for (const el of bgElements) {
         const bg = window.getComputedStyle(el).backgroundImage;
         if (bg && bg !== 'none') {
-          const urls = [...bg.matchAll(/url\(["']?([^"')]+)["']?\)/g)].map(m => m[1]);
+          const urls = [...bg.matchAll(/url\(["']?([^"')]+)["']?\)/g)].map((m) => m[1]);
           for (const url of urls) {
             if (/\.(png|jpe?g|gif|svg)(\?|$)/i.test(url)) {
               results.push(url);
@@ -55,7 +55,10 @@ test.describe('Images', () => {
     });
 
     if (bgImages.length > 0) {
-      expect.soft(false, `[Images] Non-WebP CSS background images on homepage (convert to .webp):\n${bgImages.map(s => `  - ${s}`).join('\n')}`).toBeTruthy();
+      expect.soft(
+        false,
+        `[Images] Non-WebP CSS background images on homepage (convert to .webp):\n${bgImages.map((s) => `  - ${s}`).join('\n')}`
+      ).toBeTruthy();
     }
   });
 
@@ -70,7 +73,7 @@ test.describe('Images', () => {
     for (let i = 0; i < maxImages; i++) {
       const src = await images.nth(i).getAttribute('src');
       if (!src || src.startsWith('data:')) continue;
-      srcs.push(src.startsWith('http') ? src : `${process.env.BASE_URL || ''}${src}`);
+      srcs.push(src.startsWith('http') ? src : `${config.baseURL}${src}`);
     }
 
     const oversized: string[] = [];
@@ -81,7 +84,7 @@ test.describe('Images', () => {
           const cl = response.headers()['content-length'];
           if (cl) {
             const sizeKB = parseInt(cl, 10) / 1024;
-            if (sizeKB > IMAGE_SIZE_LIMIT_KB) {
+            if (sizeKB > config.imageSizeLimitKb) {
               oversized.push(`${url} — ${sizeKB.toFixed(0)}KB`);
             }
           }
@@ -92,7 +95,10 @@ test.describe('Images', () => {
     );
 
     if (oversized.length > 0) {
-      expect.soft(false, `[Images] ${oversized.length} image(s) exceed ${IMAGE_SIZE_LIMIT_KB}KB (compress in WordPress):\n${oversized.map(s => `  - ${s}`).join('\n')}`).toBeTruthy();
+      expect.soft(
+        false,
+        `[Images] ${oversized.length} image(s) exceed ${config.imageSizeLimitKb}KB (compress in WordPress):\n${oversized.map((s) => `  - ${s}`).join('\n')}`
+      ).toBeTruthy();
     }
   });
 });
