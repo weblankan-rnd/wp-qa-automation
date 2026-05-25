@@ -1,6 +1,6 @@
 # WordPress QA Agent — Playwright Test Suite
 
-Automated frontend QA suite for WordPress sites. Discovers pages automatically from the sitemap and runs tests across **15+ categories** including SEO, accessibility, performance, visual regression, security, and spelling.
+Automated frontend QA suite for WordPress sites. Discovers pages automatically from the sitemap and runs tests across **14+ categories** including SEO, accessibility, performance, security, and spelling.
 
 ---
 
@@ -109,13 +109,6 @@ npm run test:report
 - [x] Spell suggestions on misspellings
 - [x] Double-space detection
 
-### `visual-regression` (pixelmatch)
-- [x] Pixel-perfect screenshot comparison
-- [x] Multi-viewport (desktop + mobile)
-- [x] Diff image generation
-- [x] Configurable threshold
-- [x] Baseline update with `UPDATE_SNAPSHOTS=true`
-
 ### `security`
 - [x] Security headers check (HSTS, X-Frame-Options, etc.)
 - [x] CSP unsafe-inline/unsafe-eval detection
@@ -143,8 +136,6 @@ cp .env.example .env
 | `MAX_RENDER_BLOCKING` | `8` | Max render-blocking resources |
 | `IMAGE_SIZE_LIMIT_KB` | `500` | Max image file size |
 | `ACCESSIBILITY_IMPACT` | `critical` | Min impact level to fail on |
-| `UPDATE_SNAPSHOTS` | `false` | Generate new visual regression baselines |
-| `VISUAL_REGRESSION_THRESHOLD` | `0.05` | Max pixel diff ratio (5%) |
 | `MAX_PAGES_TO_CHECK` | `20` | Cap on dynamically discovered pages |
 | `MAX_FOCUS_CHECK` | `30` | Max elements to check for keyboard focus |
 
@@ -170,8 +161,6 @@ cp .env.example .env
 | `npm run test:security` | Security headers & REST API |
 | `npm run test:spell` | Dictionary-based spell check |
 | `npm run test:console-errors` | JS console error detection |
-| `npm run test:visual` | Visual regression (screenshot comparison) |
-| `npm run test:visual:update` | Update visual regression baselines |
 | `npm run test:seo` | SEO tags only |
 | `npm run test:performance` | Performance only |
 | `npm run test:images` | Image format & size |
@@ -227,7 +216,6 @@ tests/                       # Playwright spec files (15 total)
   accessibility.spec.ts      # axe-core WCAG audits
   console-errors.spec.ts     # JS error detection per page
   spell-check.spec.ts        # Dictionary-based spelling across pages
-  visual-regression.spec.ts  # Screenshot comparison with pixelmatch
   security.spec.ts           # Security headers, CSP, REST API
   forms.spec.ts              # (reserved, staging only)
   registration.spec.ts       # (reserved, staging only)
@@ -244,9 +232,6 @@ test-utils/
   fixtures.ts                # Custom test fixtures
 test-data/
   .page-cache.json           # Auto-generated page list from sitemap
-  screenshots/               # Visual regression baselines + diffs
-    baseline/                # Reference screenshots
-    diff/                    # Generated diff images
 reports/                     # Auto-generated test reports
 .github/workflows/
   qa.yml                     # CI: manual trigger + Slack notifications
@@ -260,17 +245,7 @@ AGENTS.md                    # QA agent instructions & conventions
 ## CI/CD
 
 - **Manual trigger**: GitHub Actions tab → "QA" → "Run workflow"
-- **Artifacts**: HTML report (14 days), test results (7 days), visual diffs (30 days)
-
-## Visual Regression Workflow
-
-1. First run generates baselines (test warns "no baseline found")
-2. Run again to compare — passes if within threshold
-3. After intentional visual changes:
-   ```bash
-   npm run test:visual:update   # regenerates baselines
-   ```
-4. Commit the updated baseline images to the repo
+- **Artifacts**: HTML report (14 days), test results (7 days)
 
 ## Adding a Test
 

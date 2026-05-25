@@ -41,10 +41,6 @@ export const config = {
     desktop: { width: 1440, height: 900 },
   } as const,
 
-  /** Visual regression baseline directory */
-  screenshotBaselineDir: 'test-data/screenshots/baseline',
-  screenshotDiffDir: 'test-data/screenshots/diff',
-
   /** Retry count for flaky tests */
   retries: process.env.CI ? 1 : 0,
 } as const;

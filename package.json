@@ -15,8 +15,6 @@
     "test:a11y": "playwright test tests/accessibility.spec.ts",
     "test:security": "playwright test tests/security.spec.ts",
     "test:console-errors": "playwright test tests/console-errors.spec.ts",
-    "test:visual": "playwright test tests/visual-regression.spec.ts",
-    "test:visual:update": "UPDATE_SNAPSHOTS=true playwright test tests/visual-regression.spec.ts",
     "test:chrome": "playwright test --project 'Desktop Chrome' --project 'Mobile Chrome'",
     "test:firefox": "playwright test --project 'Desktop Firefox'",
     "test:safari": "playwright test --project 'Desktop Safari' --project 'Mobile Safari'",
@@ -45,8 +43,6 @@
     "dictionary-en": "^4.0.0",
     "dotenv": "^16.4.5",
     "nspell": "^2.1.5",
-    "pixelmatch": "^7.2.0",
-    "pngjs": "^7.0.0",
     "typescript": "^5.5.3"
   }
 }
