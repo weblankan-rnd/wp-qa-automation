@@ -130,6 +130,8 @@ test.describe('Responsive Design', () => {
           'p, li, span, a, h1, h2, h3, h4, h5, h6, label, button'
         );
         for (const el of textEls) {
+          // Skip elements not actually rendered in the page flow
+          if (!(el as HTMLElement).offsetParent) continue;
           const style = window.getComputedStyle(el);
           if (style.display === 'none' || style.visibility === 'hidden') continue;
           const text = el.textContent?.trim();
