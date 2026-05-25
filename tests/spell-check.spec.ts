@@ -5,7 +5,7 @@
  * Checks visible body text for potential misspellings.
  */
 import { test, expect } from '@playwright/test';
-import { getPagesToCheck, pageLabel, isArchivePage } from '../test-utils/get-pages-to-check';
+import { getPagesToCheck, pageLabel } from '../test-utils/get-pages-to-check';
 import { checkSpelling, stripHtml } from '../test-utils/spell-check';
 
 const pagesToCheck = getPagesToCheck();

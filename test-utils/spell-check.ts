@@ -85,7 +85,8 @@ export async function checkSpelling(text: string): Promise<string[]> {
       { wrong: /\b(infromation)\b/gi, fix: 'information' },
     ];
     for (const { wrong, fix } of commonTypos) {
-      if (wrong.test(text)) errors.push(`"${wrong.source}" — should be "${fix}"`);
+      const match = text.match(wrong);
+      if (match) errors.push(`"${match[1]}" — should be "${fix}"`);
     }
   }
 
