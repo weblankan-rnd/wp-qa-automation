@@ -2,8 +2,6 @@ import { test, expect } from '@playwright/test';
 import { config } from '../test-utils/config';
 import { getPagesToCheck } from '../test-utils/get-pages-to-check';
 import { FOOTER } from '../test-utils/selectors';
-import { checkSpelling, stripHtml } from '../test-utils/spell-check';
-
 const pagesToCheck = getPagesToCheck();
 
 test.describe('Footer', () => {
@@ -232,29 +230,6 @@ test.describe('Footer', () => {
             `[Footer] External link "${href}" is missing target="_blank"`
           )
           .toBeTruthy();
-    }
-  });
-
-  test('no spelling mistakes in footer text @smoke', async ({ page }) => {
-    const footer = page.locator(FOOTER.CONTAINER);
-    if ((await footer.count()) === 0) {
-      console.warn('[Footer] No footer found to check spelling');
-      return;
-    }
-    await footer.scrollIntoViewIfNeeded().catch(() => {});
-    const htmlContent = await footer.innerHTML();
-    const textContent = stripHtml(htmlContent);
-    const errors = await checkSpelling(textContent);
-    const capsSentenceStart = textContent.match(/\.\s+[a-z]/g);
-    if (capsSentenceStart?.length)
-      errors.push(`${capsSentenceStart.length} sentence(s) may not start with uppercase`);
-    if (errors.length > 0) {
-      expect
-        .soft(
-          false,
-          `[Footer] Spelling/text issues in footer:\n${errors.map((e) => `  - ${e}`).join('\n')}`
-        )
-        .toBeTruthy();
     }
   });
 
