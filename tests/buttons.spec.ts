@@ -158,6 +158,10 @@ test.describe('Buttons', () => {
   });
 
   test('upload field exists and is visible on contact page @smoke', async ({ page }) => {
+    if (!pagesToCheck.includes('/contact-us/')) {
+      console.warn('[Buttons] Skipping contact page upload test — /contact-us/ not in page list');
+      return;
+    }
     await page.goto('/contact-us/', { waitUntil: 'domcontentloaded' });
     const fileInput = page.locator(BUTTONS.FILE_UPLOAD);
     const fileInputCount = await fileInput.count();
@@ -181,6 +185,10 @@ test.describe('Buttons', () => {
   });
 
   test('upload trigger element is clickable on contact page @smoke', async ({ page }) => {
+    if (!pagesToCheck.includes('/contact-us/')) {
+      console.warn('[Buttons] Skipping contact page upload trigger test — /contact-us/ not in page list');
+      return;
+    }
     await page.goto('/contact-us/', { waitUntil: 'domcontentloaded' });
     const uploadTrigger = page.locator(BUTTONS.UPLOAD_TRIGGER);
     const count = await uploadTrigger.count();

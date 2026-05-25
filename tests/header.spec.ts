@@ -100,10 +100,11 @@ test.describe('Header', () => {
       width: config.viewports.mobile.width,
       height: config.viewports.mobile.height,
     });
-    await page.goto('/contact-us/', { waitUntil: 'domcontentloaded' });
+    const testPath = pagesToCheck.filter(p => p !== '/')[0] || '/';
+    await page.goto(testPath, { waitUntil: 'domcontentloaded' });
     const menuHam = page.locator(HEADER.HAMBURGER);
     if (!(await menuHam.isVisible().catch(() => false))) {
-      console.warn('[Header] Hamburger not visible on /contact-us/');
+      console.warn(`[Header] Hamburger not visible on ${testPath}`);
       return;
     }
     await menuHam.click();
