@@ -14,11 +14,11 @@ on:
       base_url:
         description: 'Target URL (leave blank for default)'
         required: false
-        default: 'https://supercorals.hostweblankan.in'
+        default: 'https://www.weblankan.com'
       pages:
         description: 'Pages to test — comma separated (e.g. /,/about-us/,/contact-us/). Leave blank to use defaults.'
         required: false
-        default: '/,/about-us/,/accommodation/,/excursions/,/restaurant-and-bar/,/special-offers/,/gallery/,/contact-us/'
+        default: '/'
       accessibility_impact:
         description: 'Min accessibility impact to fail on'
         required: false
@@ -57,7 +57,7 @@ jobs:
         run: |
           mkdir -p test-data
           node -e "
-            const raw = '${{ inputs.pages || github.event.inputs.pages || '/,/about-us/,/accommodation/,/excursions/,/restaurant-and-bar/,/special-offers/,/gallery/,/contact-us/' }}';
+            const raw = '${{ inputs.pages || github.event.inputs.pages || '/' }}';
             const pages = raw.split(',').map(p => p.trim()).filter(p => p.startsWith('/'));
             require('fs').writeFileSync('test-data/.page-cache.json', JSON.stringify(pages));
             console.log('Pages to test (' + pages.length + '):', pages.join(', '));
@@ -68,7 +68,7 @@ jobs:
         run: npx playwright test
         continue-on-error: true
         env:
-          BASE_URL: ${{ inputs.base_url || github.event.inputs.base_url || 'https://supercorals.hostweblankan.in' }}
+          BASE_URL: ${{ inputs.base_url || github.event.inputs.base_url || 'https://www.weblankan.com' }}
           FULL_MATRIX: ${{ inputs.full_matrix || 'false' }}
           SKIP_PAGE_DISCOVERY: 'true'
           ACCESSIBILITY_IMPACT: ${{ inputs.accessibility_impact || 'critical' }}
@@ -94,7 +94,7 @@ jobs:
         if: always()
         run: |
           echo "## ⚙️ QA Run Summary" >> $GITHUB_STEP_SUMMARY
-          echo "- **Target:** ${{ inputs.base_url || 'https://supercorals.hostweblankan.in' }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Target:** ${{ inputs.base_url || 'https://www.weblankan.com' }}" >> $GITHUB_STEP_SUMMARY
           echo "- **Browser matrix:** ${{ inputs.full_matrix == 'true' && 'Full (5 browsers)' || 'Chrome only' }}" >> $GITHUB_STEP_SUMMARY
           echo "- **Accessibility impact:** ${{ inputs.accessibility_impact || 'critical' }}" >> $GITHUB_STEP_SUMMARY
 
@@ -119,7 +119,7 @@ jobs:
         continue-on-error: true
         env:
           LHCI_GITHUB_APP_TOKEN: ${{ secrets.LHCI_GITHUB_APP_TOKEN }}
-          BASE_URL: ${{ inputs.base_url || 'https://supercorals.hostweblankan.in' }}
+          BASE_URL: ${{ inputs.base_url || 'https://www.weblankan.com' }}
 
       - name: Upload Lighthouse report
         uses: actions/upload-artifact@v4
