@@ -114,7 +114,15 @@ const SKIP_WORDS = new Set([
   'polylang',
   'litespeed',
   'wpengine',
-  // Industry terms
+  // Industry / marketing terms
+  'dmc', 'dmcs',
+  'seo', 'sem', 'smm',
+  'ppc', 'roi',
+  'serps', 'serp',
+  'scrollers', 'scroller',
+  'corporates', 'corporate',
+  'scalable',
+  'optimisation', 'optimise', 'optimising',
   'cannabis',
   'cbd',
   'thc',
@@ -132,6 +140,7 @@ const SKIP_WORDS = new Set([
   'kandy',
   'galle',
   'jaffna',
+  'nugegoda', 'gangodawila', 'mawatha', 'pathirage',
   'weblankan',
   'gammaaextracts',
   // Common web terms

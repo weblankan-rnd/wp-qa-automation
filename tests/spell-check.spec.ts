@@ -6,7 +6,7 @@
  */
 import { test, expect } from '@playwright/test';
 import { getPagesToCheck, pageLabel } from '../test-utils/get-pages-to-check';
-import { checkSpelling, stripHtml } from '../test-utils/spell-check';
+import { checkSpelling } from '../test-utils/spell-check';
 
 const pagesToCheck = getPagesToCheck();
 
@@ -17,8 +17,9 @@ test.describe('Spell Check', () => {
     test(`no spelling errors in body text on ${label}`, async ({ page }) => {
       await page.goto(pagePath, { waitUntil: 'domcontentloaded' });
 
-      const bodyHtml = await page.locator('body').innerHTML();
-      const textContent = stripHtml(bodyHtml);
+      // Use innerText to get only visible rendered text, skipping CSS classes/HTML attributes
+      const textContent = await page.locator('body').innerText();
+      if (!textContent.trim()) return;
 
       const errors = await checkSpelling(textContent);
 

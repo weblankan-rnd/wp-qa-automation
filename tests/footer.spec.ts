@@ -254,7 +254,7 @@ test.describe('Footer', () => {
       console.warn('[Footer] No phone link found in footer');
       return;
     }
-    const href = await phoneLink.first().getAttribute('href');
+    const href = (await phoneLink.first().getAttribute('href')) || '';
     const hrefClean = href.replace(/[()\s-]/g, '');
     if (!hrefClean || !/^tel:\+?[\d]+$/.test(hrefClean))
       expect
