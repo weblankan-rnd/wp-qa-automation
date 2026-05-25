@@ -30,10 +30,11 @@ test.describe('Footer', () => {
   });
 
   test('clicking footer logo navigates to home page @smoke', async ({ page }) => {
-    await page.goto('/ceylon-cannabis/', { waitUntil: 'domcontentloaded' });
+    const testPath = pagesToCheck.filter(p => p !== '/')[0] || '/';
+    await page.goto(testPath, { waitUntil: 'domcontentloaded' });
     const footerLogo = page.locator(FOOTER.LOGO).first();
     if ((await footerLogo.count()) === 0) {
-      console.warn('[Footer] Footer logo not found on /ceylon-cannabis/');
+      console.warn(`[Footer] Footer logo not found on ${testPath}`);
       return;
     }
     await footerLogo.scrollIntoViewIfNeeded();

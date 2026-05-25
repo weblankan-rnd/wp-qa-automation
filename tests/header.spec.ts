@@ -27,11 +27,12 @@ test.describe('Header', () => {
   });
 
   test('clicking header logo navigates to home page @smoke', async ({ page }) => {
-    await page.goto('/ceylon-cannabis/', { waitUntil: 'domcontentloaded' });
+    const testPath = pagesToCheck.filter(p => p !== '/')[0] || '/';
+    await page.goto(testPath, { waitUntil: 'domcontentloaded' });
     const headerLogo = page.locator(HEADER.LOGO).first();
     const visible = await headerLogo.isVisible().catch(() => false);
     if (!visible) {
-      console.warn('[Header] Header logo not visible on /ceylon-cannabis/');
+      console.warn(`[Header] Header logo not visible on ${testPath}`);
       return;
     }
     await headerLogo.click();
