@@ -36,14 +36,6 @@ on:
         options:
           - 'false'
           - 'true'
-      slack_notify:
-        description: 'Send Slack notification on failure'
-        required: false
-        default: 'true'
-        type: choice
-        options:
-          - 'true'
-          - 'false'
 
 jobs:
   # ── Smoke Tests ──────────────────────────────────────────────────────────────
@@ -123,26 +115,6 @@ jobs:
           echo "- **Visual regression:** ${{ inputs.visual_regression == 'true' && '✅ Enabled' || '⏭️ Skipped' }}" >> $GITHUB_STEP_SUMMARY
           echo "- **Accessibility impact:** ${{ inputs.accessibility_impact || 'critical' }}" >> $GITHUB_STEP_SUMMARY
 
-      # ── Slack Notification (on failure) ─────────────────────────────────
-      - name: Send Slack notification on failure
-        if: ${{ failure() && (inputs.slack_notify || 'true') == 'true' }}
-        uses: slackapi/slack-github-action@v2
-        with:
-          webhook: ${{ secrets.SLACK_WEBHOOK_URL }}
-          webhook-type: incoming-webhook
-          payload: |
-            {
-              "text": "❌ QA tests FAILED for ${{ inputs.base_url || 'https://supercorals.hostweblankan.in' }}",
-              "blocks": [
-                {
-                  "type": "section",
-                  "text": {
-                    "type": "mrkdwn",
-                    "text": "*❌ QA Test Failure*\n• *Target:* ${{ inputs.base_url || 'https://supercorals.hostweblankan.in' }}\n• *Trigger:* ${{ github.event_name }}\n• *Run:* <${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}|View Run>\n• *Branch:* ${{ github.ref_name }}"
-                  }
-                }
-              ]
-            }
 
   # ── Visual Regression (optional, manual trigger only) ────────────────────────
   visual-regression:

@@ -147,7 +147,6 @@ cp .env.example .env
 | `VISUAL_REGRESSION_THRESHOLD` | `0.05` | Max pixel diff ratio (5%) |
 | `MAX_PAGES_TO_CHECK` | `20` | Cap on dynamically discovered pages |
 | `MAX_FOCUS_CHECK` | `30` | Max elements to check for keyboard focus |
-| `SLACK_WEBHOOK_URL` | — | Slack webhook for CI failure notifications |
 
 ---
 
@@ -261,7 +260,6 @@ AGENTS.md                    # QA agent instructions & conventions
 ## CI/CD
 
 - **Manual trigger**: GitHub Actions tab → "QA" → "Run workflow"
-- **Slack notification**: On failure (configure `SLACK_WEBHOOK_URL` secret)
 - **Artifacts**: HTML report (14 days), test results (7 days), visual diffs (30 days)
 
 ## Visual Regression Workflow
