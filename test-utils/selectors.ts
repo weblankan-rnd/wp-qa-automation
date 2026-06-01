@@ -12,71 +12,74 @@
 
 export const HEADER = {
   /** Header navigation bar container */
-  NAV: 'header#header, header.header, header[role="banner"]',
+  NAV: 'header, header#header, header.header, header[role="banner"]',
 
-  /** Primary logo link */
-  LOGO: 'header [data-testid="header-logo"], header .navbar-brand',
+  /** Primary logo link — Next.js: header a[href="/"], WP: .navbar-brand */
+  LOGO:
+    'header [data-testid="header-logo"], header .navbar-brand, header a[href="/"]',
 
-  /** Logo <img> inside header */
-  LOGO_IMG: 'header [data-testid="header-logo"] img, header .navbar-brand img',
+  /** Logo <img> — Next.js: img[alt="Logo"], WP: .navbar-brand img */
+  LOGO_IMG:
+    'header [data-testid="header-logo"] img, header .navbar-brand img, header img[alt="Logo"], header img[alt*="logo" i]',
 
-  /** Logo <img> with main-logo class (fallback) */
-  LOGO_IMG_MAIN: 'header .navbar-brand img',
+  /** Logo <img> main — same as LOGO_IMG, alias used by some tests */
+  LOGO_IMG_MAIN:
+    'header .navbar-brand img, header img[alt="Logo"], header img[alt*="logo" i]',
 
-  /** Desktop navigation links (top-bar and main menu) */
+  /** Desktop navigation links */
   NAV_LINKS:
-    'header nav.navbar ul.navbar-nav li a.nav-link, header [data-testid*="nav-link"]',
+    'header nav a, header nav.navbar ul.navbar-nav li a.nav-link, header [data-testid*="nav-link"]',
 
-  /** Hamburger menu button (mobile) — prefers visible toggle buttons */
+  /** Hamburger menu button (mobile) */
   HAMBURGER:
-    '[data-testid="hamburger"], button.hamburger.btn-close, [class*="menu-toggle"]',
+    '[data-testid="hamburger"], button[class*="hamburger"], button[class*="menu-toggle"], button[class*="toggle"], [class*="menu-toggle"], header button[aria-label*="menu" i], header button[aria-label*="navigation" i]',
 
   /** Mobile menu container */
   MOBILE_MENU:
-    '[data-testid="mobile-menu"], .menuhamburge.wrapper, .mobilemenuwraper, .mobile-menu-only, [class*="mobile-menu"]',
+    '[data-testid="mobile-menu"], [class*="mobile-menu"], [class*="mobileMenu"], .menuhamburge, .mobilemenuwraper, .mobile-menu-only, header nav ul',
 
   /** Mobile menu link items */
   MOBILE_LINKS:
-    '[data-testid="mobile-menu"] a, .menuhamburge a, .mobilemenuwraper a, .wrapper a, [class*="mobile-menu"] a',
+    '[data-testid="mobile-menu"] a, [class*="mobile-menu"] a, [class*="mobileMenu"] a, .menuhamburge a, .mobilemenuwraper a, header nav ul a',
 
-  /** Current/active menu item */
+  /** Current/active menu item — Next.js: a[class*="active"], WP: .current-menu-item */
   ACTIVE_ITEM:
-    'header .current-menu-item, header .current_page_item, header .menu-item.current-menu-item',
+    'header .current-menu-item, header .current_page_item, header [class*="active"]',
 
-  /** Active link inside the active item */
+  /** Active link — Next.js: a[class*="menu-link-active"], WP: .current-menu-item a */
   ACTIVE_LINK:
-    'header .current-menu-item a, header .current_page_item a, header .menu-item.current-menu-item a',
+    'header .current-menu-item a, header .current_page_item a, header a[class*="menu-link-active"], header a[class*="active"]',
 
   /** Mobile active item */
   MOBILE_ACTIVE:
-    '.menuhamburge .current-menu-item, .mobilemenuwraper .current-menu-item, .mobile-menu-only .current-menu-item, .mobile-menu .current-menu-item',
+    '.menuhamburge .current-menu-item, .mobilemenuwraper .current-menu-item, .mobile-menu-only .current-menu-item, [class*="mobile-menu"] .current-menu-item, [class*="mobile-menu"] a[class*="active"]',
 } as const;
 
 export const FOOTER = {
   /** Footer element */
   CONTAINER: 'footer[data-testid="footer"], footer',
 
-  /** Footer logo — many themes don't have an explicit footer logo */
+  /** Footer logo link — Next.js: footer a[href="/"], WP: .footer-logo */
   LOGO:
-    'footer [data-testid="footer-logo"], footer .footer-logo, footer .footerlogo, footer img[alt*="logo" i], footer img[src*="logo"]',
+    'footer [data-testid="footer-logo"], footer .footer-logo, footer .footerlogo, footer a[href="/"], footer img[alt*="logo" i], footer img[src*="logo"]',
 
-  /** Footer logo image */
+  /** Footer logo image — Next.js: img[alt="Footer Logo"], WP: .footer-logo img */
   LOGO_IMG:
-    'footer [data-testid="footer-logo"] img, footer .footer-logo img, footer .footerlogo img, footer img[alt*="logo" i], footer img[src*="logo"], footer .goole-partners img',
+    'footer [data-testid="footer-logo"] img, footer .footer-logo img, footer .footerlogo img, footer img[alt="Footer Logo"], footer img[alt*="logo" i], footer img[src*="logo"], footer .goole-partners img',
 
-  /** Footer navigation links (not all themes have a footer menu) */
+  /** Footer navigation links — Next.js: footer nav a, WP: .footer-menu a */
   MENU_LINKS:
     'footer [data-testid="footer-menu"] a, footer .footer-menu a, footer nav a',
 
-  /** Copyright section */
+  /** Copyright section — Next.js: footer [class*="copyright"] or last div with year text, WP: .copyright */
   COPYRIGHT:
-    'footer [data-testid="copyright"], footer .copyright, footer [class*="copyright"], footer section:last-of-type',
+    'footer [data-testid="copyright"], footer .copyright, footer [class*="copyright"], footer [class*="bottom"], footer section:last-of-type, footer > div:last-child',
 
-  /** Social links container */
+  /** Social links — href-based works for both Next.js and WP */
   SOCIAL_LINKS:
-    'footer [data-testid="social-links"] a, footer .social-links a, footer [class*="social"] a, footer a[href*="facebook.com"], footer a[href*="linkedin.com"], footer a[href*="instagram.com"]',
+    'footer [data-testid="social-links"] a, footer .social-links a, footer [class*="social"] a, footer a[href*="facebook.com"], footer a[href*="linkedin.com"], footer a[href*="instagram.com"], footer a[href*="twitter.com"], footer a[href*="youtube.com"]',
 
-  /** Web Lankan link — site may not self-link if already on weblankan.com */
+  /** Web Lankan link */
   WEB_LANKAN_LINK:
     'footer a[href*="weblankan.com"], footer a[href*="weblankan"], footer img[src*="weblankan"]',
 
@@ -94,7 +97,7 @@ export const NAVIGATION = {
   /** Banner / hero menu links */
   BANNER_LINKS: '.menu-wrap ul li a, [data-testid*="banner-link"]',
 
-  /** All header-based links (desktop + mobile) */
+  /** All header-based links (desktop + mobile) — Next.js: header a, WP: .right-wrap-navMenu a */
   HEADER_LINKS:
     'header a, .right-wrap-navMenu a, .menuhamburge a, [data-testid*="nav-link"]',
 
@@ -123,9 +126,10 @@ export const BUTTONS = {
 } as const;
 
 export const RESPONSIVE = {
-  /** Elements that indicate a hamburger/mobile menu or mobile nav is visible */
+  /** Elements that indicate a hamburger/mobile menu is present — Next.js: button[class*="hamburger"] or button[class*="toggle"], WP: .mobilemenuwraper */
   HAMBURGER:
-    'button.hamburger, .mobilemenuwraper, .mobile-menu-only, [class*="menu-toggle"], ' +
+    'button[class*="hamburger"], button[class*="menu-toggle"], button[class*="toggle"], ' +
+    '.mobilemenuwraper, .mobile-menu-only, [class*="menu-toggle"], ' +
     '[aria-label*="menu" i], [aria-label*="navigation" i], ' +
-    'button[class*="menu"], button[class*="toggle"], .right-wrap-navMenu',
+    'button[class*="menu"], .right-wrap-navMenu',
 } as const;
